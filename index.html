@@ -95,16 +95,8 @@
   <section class="teaser">
     <div class="container">
       <figure>
-        <img src="assets/HExA.png" alt="HExA overview: ReAct vs. the HExA meta-episode loop with a skill bank vs. transfer to unseen tasks" />
-        <figcaption>
-          <strong>Figure 1.</strong> Overview of HExA.
-          <em>(a) ReAct</em> solves each task instance independently, with no learning across instances.
-          <em>(b) HExA</em> runs a meta-episode: an <em>actor</em> experiments through tools, an <em>evolver</em>
-          contrasts successful and failed trajectories and distills them into a persistent <strong>skill bank</strong>,
-          and a <em>retriever</em> injects the relevant skills into the actor's context for the next instance.
-          <em>(c) Transfer:</em> banks learned on easier tasks are synthesized into a bank for an unseen task,
-          with <strong>no target-task trajectories</strong>.
-        </figcaption>
+        <img src="assets/figures/hexa_final.png" alt="Overview of the HExA framework: (a) ReAct, (b) HExA meta-episodes with a skill bank, (c) skill transfer to unseen harder tasks" />
+        <figcaption><strong>Figure 1.</strong> <strong>Overview of the HExA framework.</strong> <strong>(a) Baseline ReAct:</strong> each episode is solved independently with no cross-episode learning. Each episode consists of alternating tool calls for experimentation, terminating in success (&#10003;) or failure (&times;). <strong>(b) HExA:</strong> inner episodes are processed in successive rounds of meta-episodes. After some inner episode, an evolver distills the trajectory into a <em>Skill Bank</em> of reusable skills and recurring mistakes that condition subsequent episodes. Repeated interaction helps evolve and refine the task-specific Skill Bank. <strong>(c) Transfer to unseen tasks:</strong> each source task runs the HExA loop independently to build its Skill Bank. The resulting banks are synthesized by the evolver into a single generalizable Skill Bank for zero-shot transfer to harder target tasks, with no target trajectories used during bank construction.</figcaption>
       </figure>
     </div>
   </section>
@@ -319,12 +311,7 @@
 
       <figure class="inline-fig">
         <img src="assets/Feedback_Loop.png" alt="The HeXA actor, skill evolver, and evolving skill bank feedback loop" />
-        <figcaption>
-          <strong>Figure 2.</strong> The actor&ndash;evolver&ndash;retriever loop (one round). The actor runs each
-          episode with the retrieved skill context prepended; trajectories are tagged with rewards. The evolver
-          curates the skill bank (capped at <em>M</em><sub>max</sub> skills, <em>N</em><sub>max</sub> mistakes per
-          task family); the retriever re-injects the top entries by weight for the next round.
-        </figcaption>
+        <figcaption><strong>Figure 2.</strong> <strong>The HExA actor-evolver loop.</strong> The actor receives distilled skills in its system prompt and runs on physics puzzles, producing trajectories annotated with rewards (successes &#10003;, failures &times;). The Skill Evolver analyzes these trajectories and curates the evolving Skill Bank: skills (max M) are merged, pruned, or promoted by reward signal, and common mistakes (max N) are updated accordingly. Each skill carries a generation index tracking its lineage across evolution rounds. The updated bank is injected back into the actor's system prompt for the next round, closing the loop.</figcaption>
       </figure>
 
       <h3 class="subhead">Reward-guided, two-pass distillation</h3>
@@ -442,8 +429,7 @@
         <h3 class="subhead">Held-out success on the two hardest levels (Claude Sonnet 4.6)</h3>
         <figure class="chart-fig">
           <img src="assets/figures/headline_catapult.png" alt="Building and using the skill bank on catapult and pass_the_parcel: HExA 83% and 96% held-out, above all memory baselines" loading="lazy" />
-          <figcaption><strong>Figure 3.</strong> Left: cumulative solve rate while building the bank. Right: held-out
-          solve rate with the frozen bank, annotated with mean turns per seed and injected tokens per episode.</figcaption>
+          <figcaption><strong>Figure 3.</strong> <strong>HExA uses experimentation and learned skills for higher success with greater efficiency.</strong> Claude Sonnet 4.6 on <code>catapult</code> (top) and <code>pass_the_parcel</code> (bottom). <em>Left:</em> cumulative solve rate while skills are built over training seeds. <em>Right:</em> solve rate on held-out seeds using the final frozen skill bank; labels report mean turns per seed and injected tokens per episode. Curves and bars are means over three runs; bands and error bars denote &plusmn;1 s.d. Full results are in the table below.</figcaption>
         </figure>
         <div class="table-wrap">
           <table class="results-table">
@@ -473,10 +459,16 @@
         <strong>76%</strong> on pass_the_parcel in 11.4 turns (ReAct: 56% in 17.6), injecting 1.1k and 3.2k tokens
         per episode.
       </p>
-      <figure class="chart-fig container--narrow">
-        <img src="assets/figures/astra_ptp_catapult_combined.png" alt="GPT-6-Astra: HExA 76% on pass_the_parcel and 100% on catapult vs ReAct 56% and 92%" loading="lazy" />
-        <figcaption><strong>Figure 4.</strong> GPT-6-Astra, held-out solve rate with mean turns per seed and injected tokens per episode.</figcaption>
-      </figure>
+      <div class="chart-2col">
+        <figure class="chart-fig">
+          <img src="assets/figures/astra_catapult.png" alt="GPT-6-Astra on catapult: training and held-out solve rates" loading="lazy" />
+          <figcaption><strong>Figure 4.</strong> <strong>GPT-6-Astra on <code>catapult</code>.</strong> <em>(a)</em> Cumulative solve rate on the training seeds as the bank is built (17 rounds of 3 seeds). <em>(b)</em> Solve rate on the 50 held-out seeds with the bank frozen. Mean turns per seed and the injected memory per episode are printed above each bar. Zero-shot is run at high reasoning effort; the default-effort run also scores 0%. HExA solves every held-out seed in fewer than half the turns of ReAct.</figcaption>
+        </figure>
+        <figure class="chart-fig">
+          <img src="assets/figures/astra_pass_the_parcel.png" alt="GPT-6-Astra on pass_the_parcel: training and held-out solve rates" loading="lazy" />
+          <figcaption><strong>Figure 5.</strong> <strong>GPT-6-Astra on <code>pass_the_parcel</code>.</strong> Panels as in the <code>catapult</code> figure; Zero-shot is run at default reasoning effort. HExA raises the held-out solve rate from 56% under ReAct to 76% while cutting turns per seed from 17.6 to 11.4.</figcaption>
+        </figure>
+      </div>
 
       <h3 class="subhead">Open-weight actors (Qwen-2.5, 3 runs)</h3>
       <div class="table-wrap container--narrow">
@@ -505,7 +497,7 @@
       </p>
       <figure class="chart-fig container--narrow">
         <img src="assets/figures/skills_no_tools_avg.png" alt="Same frozen bank under different evaluation-time feedback" loading="lazy" />
-        <figcaption><strong>Figure 5.</strong> The same frozen skill bank under different evaluation-time feedback.</figcaption>
+        <figcaption><strong>Figure 6.</strong> <strong>Effect of evaluation-time feedback.</strong> Held-out solve rate for Claude Sonnet 4.6, averaged over <code>catapult</code> and <code>pass_the_parcel</code>. All orange bars use the same frozen HExA skill bank; lighter shades indicate less environment feedback. Without feedback, the bank yields a 19% solve rate, rising to 45% with extended reasoning. Providing only binary success or failure feedback raises the solve rate to 90%.</figcaption>
       </figure>
 
       <div id="exp-grpo">
@@ -556,7 +548,7 @@
       </div>
       <figure class="chart-fig container--narrow">
         <img src="assets/figures/external_bench.png" alt="HExA vs zero-shot, Episodic RAG and MemRL on games, reasoning and DiscoverPhysics" loading="lazy" />
-        <figcaption><strong>Figure 6.</strong> HExA against zero-shot and memory baselines on the non-Interphyre benchmarks.</figcaption>
+        <figcaption><strong>Figure 7.</strong> <strong>HExA improves frozen actors across all evaluated benchmark families.</strong> Averaged scores across task families of interactive games, reasoning and planning, and DiscoverPhysics; exact metrics differ, and full details are in the paper's appendix.</figcaption>
       </figure>
 
       <h3 class="subhead">Robot manipulation on LIBERO-PRO</h3>
@@ -581,7 +573,7 @@
       </div>
       <figure class="chart-fig container--narrow">
         <img src="assets/figures/pigey_libero.png" alt="LIBERO-PRO: HExA skill bank improves Pigey in all six suites" loading="lazy" />
-        <figcaption><strong>Figure 7.</strong> LIBERO-PRO success per suite.</figcaption>
+        <figcaption><strong>Figure 8.</strong> <strong>HExA improves a robot-manipulation agent on all six LIBERO-PRO perturbation suites.</strong> Success rate on the Pigey agent, whose LLM orchestrator drives a frozen &pi;<sub>0.5</sub> policy, over tasks 0&ndash;9 on held-out initial states (250 episodes per bar, one built bank per suite). <em>&pi;<sub>0.5</sub></em> gives the task instruction directly to the policy with no orchestrator; <em>Pigey</em> adds the Claude Sonnet 5.5 orchestrator; <em>HExA</em> is the same orchestrator with the frozen HExA skill bank injected. The bank adds +6.8 to +30.4 points over the same orchestrator without it, with the smallest gain on the suite where the no-bank agent already succeeds most often (spatial task).</figcaption>
       </figure>
     </div>
   </section>
@@ -616,7 +608,7 @@
       </p>
       <figure class="chart-fig container--narrow">
         <img src="assets/figures/bank_ablation.png" alt="Bank content and ranking ablations" loading="lazy" />
-        <figcaption><strong>Figure 8.</strong> Bank component and ranking ablations.</figcaption>
+        <figcaption><strong>Figure 9.</strong> <strong>How the skill bank content drives the gains.</strong> <em>Top:</em> removing skills or mistakes hurts, while unnecessary wrong-level skills hurt and go below the ReAct baseline. <em>Bottom:</em> removing high-reward skills hurts substantially more than removing low-reward ones; permuting rewards also degrades performance.</figcaption>
       </figure>
 
       <h3 class="subhead">Reward labels and update regime</h3>
@@ -629,11 +621,11 @@
       <div class="chart-2col">
         <figure class="chart-fig">
           <img src="assets/figures/reward_ablation.png" alt="Reward ablation: with vs without reward labels" loading="lazy" />
-          <figcaption><strong>Figure 9.</strong> With vs. without reward labels.</figcaption>
+          <figcaption><strong>Figure 10.</strong> Solve rate (%) per level; the number above each bar is the mean turns to solve. The <em>no reward</em> bar treats every success and failure identically, so the evolver prunes from its own prior rather than from environment feedback.</figcaption>
         </figure>
         <figure class="chart-fig">
           <img src="assets/figures/variants_scatter.png" alt="Update-regime variants: accuracy vs turns" loading="lazy" />
-          <figcaption><strong>Figure 10.</strong> Update regimes: success vs. turns.</figcaption>
+          <figcaption><strong>Figure 11.</strong> <strong>HExA variants accuracy&ndash;efficiency comparison.</strong> Solve rate vs. mean turns to termination for each skill-bank initialization and update strategy with ablations on Sonnet 4.6. Colour marks the strategy and shape marks the task; the upper left is better. On both levels, Off2On + Evolution is the strategy with highest accuracy and efficiency. Arrows show its gain over Zero-shot.</figcaption>
         </figure>
       </div>
     </div>
@@ -654,7 +646,7 @@
       </p>
       <figure class="chart-fig container--narrow">
         <img src="assets/figures/transfer.png" alt="Transfer: catapult from three source levels 42.7% vs ReAct 11.0%; Mastermind transferred banks" loading="lazy" />
-        <figcaption><strong>Figure 11.</strong> (a) catapult, Claude Sonnet 4.6. (b) Mastermind, GPT-OSS-120B.</figcaption>
+        <figcaption><strong>Figure 12.</strong> <strong>HExA on transferred hierarchical skill banks improves zero-shot performance on target tasks.</strong> <em>(a)</em> On <code>catapult</code>, skills synthesized from three easier levels raise Claude Sonnet to 42.7%. <em>(b)</em> On Mastermind, transferred banks can even improve over within-task HExA, reaching 93%.</figcaption>
       </figure>
 
       <h3 class="subhead">Synthesis is what makes transfer work</h3>
