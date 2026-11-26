@@ -270,18 +270,23 @@
   // ---------- controls ----------
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   build();
+  // show/hide with inline styles too, so a stale cached stylesheet cannot leave both visible
+  function show(e, vis) { e.hidden = !vis; e.style.display = vis ? "" : "none"; }
   function setView(animated) {
-    host.hidden = !animated; img.hidden = animated;
-    btnPlay.hidden = !animated;
+    show(host, animated); show(img, !animated); show(btnPlay, animated);
     btnView.textContent = animated ? "Show static figure" : "Show animation";
-    if (!animated) { stop(); } else if (playing) { run(); } else { stop(); showFinal(); }
+    if (!animated) { stop(); } else if (playing) { stop(); run(); } else { stop(); showFinal(); }
   }
   btnPlay.addEventListener("click", () => {
     playing = !playing;
     btnPlay.textContent = playing ? "Pause" : "Play";
-    if (playing) run(); else { stop(); showFinal(); }
+    stop(); if (playing) run(); else showFinal();
   });
-  btnView.addEventListener("click", () => setView(host.hidden));
-  document.getElementById("teaser-controls").hidden = false;
+  btnView.addEventListener("click", () => {
+    const toAnim = host.hidden;
+    if (toAnim) { playing = true; btnPlay.textContent = "Pause"; }   // an explicit request to animate plays it
+    setView(toAnim);
+  });
+  show(document.getElementById("teaser-controls"), true);
   if (reduce) { playing = false; btnPlay.textContent = "Play"; setView(false); } else { setView(true); }
 })();
