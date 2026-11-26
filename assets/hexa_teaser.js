@@ -102,11 +102,15 @@
 
     // ---- (b) HExA ----
     S.b = el("g", { class: "tz-panel" });
-    el("rect", { x: 46, y: 118, width: 650, height: 262, rx: 8, fill: "#fdf2c9", stroke: "#3b3b98", "stroke-dasharray": "6 4", "stroke-width": 1.5 }, S.b);
-    el("rect", { x: 38, y: 126, width: 650, height: 262, rx: 8, fill: "#dff0db", stroke: "#3b3b98", "stroke-dasharray": "6 4", "stroke-width": 1.5 }, S.b);
-    S.bFront = el("rect", { x: 30, y: 134, width: 650, height: 262, rx: 8, fill: "#dde9f8", stroke: "#3b3b98", "stroke-dasharray": "6 4", "stroke-width": 1.5 }, S.b);
-    el("text", { x: 40, y: 112, class: "tz-t13" }, S.b, "K tasks (stacked: Task 1, Task 2, …, Task k)");
-    el("text", { x: 672, y: 152, class: "tz-t12", "text-anchor": "end" }, S.b, "Task 1");
+    // K task layers (Task k at the back), offset up-right like the paper figure
+    el("rect", { x: 58, y: 106, width: 640, height: 262, rx: 8, fill: "#fdf2c9", stroke: "#3b3b98", "stroke-dasharray": "6 4", "stroke-width": 1.5 }, S.b);
+    el("rect", { x: 44, y: 120, width: 640, height: 262, rx: 8, fill: "#dff0db", stroke: "#3b3b98", "stroke-dasharray": "6 4", "stroke-width": 1.5 }, S.b);
+    S.bFront = el("rect", { x: 30, y: 134, width: 640, height: 262, rx: 8, fill: "#dde9f8", stroke: "#3b3b98", "stroke-dasharray": "6 4", "stroke-width": 1.5 }, S.b);
+    el("text", { x: 692, y: 117, class: "tz-t11", "text-anchor": "end" }, S.b, "Task k");
+    el("text", { x: 678, y: 131, class: "tz-t11", "text-anchor": "end" }, S.b, "Task 2");
+    el("text", { x: 662, y: 150, class: "tz-t11", "text-anchor": "end" }, S.b, "Task 1");
+    el("line", { x1: 26, y1: 126, x2: 50, y2: 102, class: "tz-arrow", "marker-end": "url(#tz-head)" }, S.b);
+    el("text", { x: 4, y: 100, class: "tz-t13" }, S.b, "K tasks");
     el("text", { x: 170, y: 160, class: "tz-t14", "text-anchor": "middle" }, S.b, "Seed 1");
     el("text", { x: 466, y: 160, class: "tz-t14", "text-anchor": "middle" }, S.b, "Seed X");
     const rowsY = [178, 238, 344];
@@ -131,13 +135,19 @@
     S.bTitle = label(353, 452, "(b) HExA: meta-episodes evolve a skill bank", "tz-title");
 
     // in-panel skill bank, right of the distill column
+    // one bank per task, stacked like the tasks (Task k at the back)
+    S.kbStack = el("g", { class: "tz-kbstack" });
+    el("rect", { x: 740, y: 148, width: 66, height: 190, rx: 8, fill: "#ece9fa", stroke: "#3b3b98", "stroke-width": 1.6 }, S.kbStack);
+    el("text", { x: 802, y: 158, class: "tz-t10", "text-anchor": "end" }, S.kbStack, "Task k");
+    el("rect", { x: 726, y: 162, width: 66, height: 190, rx: 8, fill: "#e8e4f8", stroke: "#3b3b98", "stroke-width": 1.6 }, S.kbStack);
+    el("text", { x: 788, y: 172, class: "tz-t10", "text-anchor": "end" }, S.kbStack, "Task 2");
     S.kb = el("g", { class: "tz-kb" });
-    el("rect", { x: 704, y: 176, width: 92, height: 190, rx: 8, fill: "#e4e0f7", stroke: "#3b3b98", "stroke-width": 2 }, S.kb);
-    label(750, 196, "Skill Bank", "tz-t13");
-    S.kbName = label(750, 214, "K_0", "tz-t14b");
+    el("rect", { x: 712, y: 176, width: 66, height: 190, rx: 8, fill: "#e4e0f7", stroke: "#3b3b98", "stroke-width": 2 }, S.kb);
+    label(745, 194, "Skill Bank", "tz-t11");
+    S.kbName = label(745, 212, "K_0", "tz-t14b");
     S.kbBars = [];
-    for (let i = 0; i < 6; i++) S.kbBars.push(el("rect", { x: 716, y: 226 + i * 22, width: 68, height: 14, rx: 3, class: "tz-skill" }, S.kb));
-    S.rows.forEach((row) => arrow(656, row.y + 12, 702, Math.min(Math.max(row.y + 12, 186), 356)));
+    for (let i = 0; i < 6; i++) S.kbBars.push(el("rect", { x: 720, y: 224 + i * 22, width: 50, height: 14, rx: 3, class: "tz-skill" }, S.kb));
+    S.rows.forEach((row) => arrow(656, row.y + 12, 710, Math.min(Math.max(row.y + 12, 186), 356)));
 
     // ---- (c) transfer ----
     S.c = el("g", { class: "tz-panel" });
@@ -169,8 +179,10 @@
     S.target = strip(S.c, 886, 334, null, 0.62);
     arrow(1106, 343, 1030, 343);
     S.cNote = label(1008, 400, "No target trajectories or experimentation needed", "tz-t13");
-    // link from (b)'s bank into (c)
-    el("polyline", { points: "796,240 812,240 812,69 834,69", fill: "none", class: "tz-arrow tz-arrow-thin", "marker-end": "url(#tz-head)" });
+    // links: each task's evolved bank feeds its row in (c)
+    el("polyline", { points: "778,186 811,186 811,69 834,69", fill: "none", class: "tz-arrow tz-arrow-thin", "marker-end": "url(#tz-head)" });
+    el("polyline", { points: "792,200 818,200 818,139 834,139", fill: "none", class: "tz-arrow tz-arrow-thin", "marker-end": "url(#tz-head)" });
+    el("polyline", { points: "806,239 834,239", fill: "none", class: "tz-arrow tz-arrow-thin", "marker-end": "url(#tz-head)" });
 
     // ---- meta-RL formulation band ----
     S.f = el("g", { class: "tz-formulas" });
@@ -219,15 +231,20 @@
   async function fill(st, id, ms) {
     for (const c of st.cells) { on(c); await wait(ms, id); }
   }
+  // independent episodes/tasks play out side by side, so no ordering is implied
+  async function fillAll(strips, id, ms) {
+    const n = Math.max.apply(null, strips.map((s) => s.cells.length));
+    for (let i = 0; i < n; i++) { strips.forEach((s) => on(s.cells[i])); await wait(ms, id); }
+  }
   async function run() {
     const id = ++runId;
     try {
       while (true) {
         reset();
         // (a) ReAct
-        setForm(0, "(a) ReAct: each episode is solved independently, with no learning across episodes");
+        setForm(0, "(a) ReAct: episodes are independent; nothing learned on one seed carries over to another");
         on(S.aTitle);
-        for (const st of S.aStrips) { await fill(st, id, 110); await wait(250, id); }
+        await fillAll(S.aStrips, id, 150);
         await wait(700, id);
         // (b) HExA meta-episodes
         S.aStrips.forEach((s) => s.g.classList.add("tz-dim"));
@@ -236,9 +253,9 @@
         for (let r = 0; r < S.rows.length; r++) {
           const row = S.rows[r];
           const name = r === 2 ? "R" : String(r + 1);
-          setForm(0, `Meta-episode ${name}: X inner episodes, all conditioned on the same skills retrieved from the current bank`);
-          for (const st of row.strips) { on(st.chip); await wait(120, id); }
-          for (const st of row.strips) { await fill(st, id, 85); await wait(150, id); }
+          setForm(0, `Meta-episode ${name}: X independent inner episodes, all conditioned on the same skills retrieved from the current bank`);
+          row.strips.forEach((st) => on(st.chip)); await wait(300, id);
+          await fillAll(row.strips, id, 120); await wait(200, id);
           setForm(1, `After meta-episode ${name}: the evolver distils its trajectories (and rewards) into the bank`);
           on(row.distill); await wait(500, id);
           on(S.kbBars[Math.min(2 + r * 2, 5)]); on(S.kbBars[Math.min(3 + r * 2, 5)]);
@@ -247,9 +264,10 @@
         }
         await wait(500, id);
         // (c) transfer
-        setForm(2, "(c) Banks evolved on K source tasks are synthesised for an unseen target task, with no target trajectories");
+        setForm(2, "(c) Each of the K tasks evolves its own bank; the banks are synthesised for an unseen target task, with no target trajectories");
         on(S.cTitle);
-        for (const t of S.tasks) { await fill(t.strip, id, 45); on(t.bank); await wait(200, id); }
+        await fillAll(S.tasks.map((t) => t.strip), id, 90);
+        S.tasks.forEach((t) => on(t.bank)); await wait(400, id);
         on(S.synth); await wait(700, id);
         on(S.bsyn); await wait(500, id);
         on(S.target.chip); await wait(200, id);
