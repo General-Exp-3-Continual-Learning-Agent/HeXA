@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HExA: Hierarchical Experimentalist Agents</title>
-  <meta name="description" content="HExA: an in-context, experiment-centric self-improvement framework in which LLM agents design experiments, distill experience into reusable hierarchical skills, and transfer them across tasks. Evaluated on Interphyre, interactive games, reasoning and planning, DiscoverPhysics, and LIBERO-PRO robot manipulation." />
+  <meta name="description" content="HExA: an in-context, experiment-centric self-improvement framework in which LLM agents design experiments, distill experience into reusable hierarchical skills, and transfer them across tasks. Evaluated on InterPhyre, interactive games, reasoning and planning, DiscoverPhysics, and LIBERO-PRO robot manipulation." />
 
   <!-- Open Graph -->
   <meta property="og:title" content="HExA: Hierarchical Experimentalist Agents" />
@@ -30,11 +30,11 @@
       <a class="nav-brand" href="#top">HExA</a>
       <div class="nav-links">
         <a href="#abstract">Abstract</a>
-        <a href="#interphyre">Interphyre</a>
+        <a href="#interphyre">InterPhyre</a>
         <a href="#method">Method</a>
-        <a href="#claims">Claims</a>
+        <a href="#showcase">Gallery</a>
         <a href="#experiments">Results</a>
-        <a href="#beyond">Beyond Interphyre</a>
+        <a href="#beyond">Beyond InterPhyre</a>
         <a href="#ablations">Ablations</a>
         <a href="#transfer">Transfer</a>
         <a href="#skills">Skill Bank</a>
@@ -44,7 +44,7 @@
   </nav>
 
   <!-- ============================================================ -->
-  <!-- TITLE / AUTHORS / LINKS                                       -->
+  <!-- TITLE / AUTHORS / LINKS                                      -->
   <!-- ============================================================ -->
   <section class="hero" id="top">
     <div class="container">
@@ -79,7 +79,7 @@
           <span class="icon">&lt;/&gt;</span><span>Code</span>
         </a>
         <a class="link-button" href="https://github.com/sankaranv/interphyre" target="_blank" rel="noopener">
-          <span class="icon">🧪</span><span>Interphyre</span>
+          <span class="icon">🧪</span><span>InterPhyre</span>
         </a>
         <a class="link-button" href="#bibtex">
           <span class="icon">❝</span><span>BibTeX</span>
@@ -90,7 +90,7 @@
   </section>
 
   <!-- ============================================================ -->
-  <!-- TEASER FIGURE                                                 -->
+  <!-- TEASER FIGURE                                                -->
   <!-- ============================================================ -->
   <section class="teaser">
     <div class="container">
@@ -103,9 +103,50 @@
 
 
   <!-- ============================================================ -->
-  <!-- ABSTRACT                                                      -->
+  <!-- CORE CLAIMS                                                  -->
   <!-- ============================================================ -->
-  <section class="section" id="abstract">
+  <section class="section" id="claims">
+    <div class="container">
+      <h2 class="section-title">Core Claims</h2>
+      <div class="claim-grid">
+        <a class="claim-card" href="#exp-main">
+          <div class="claim-h">Solves the hardest levels frontier models fail</div>
+          <p>Every model, including a random policy, scores 0% zero-shot on catapult and pass_the_parcel. With a frozen HExA skill bank, Claude Sonnet 4.6 reaches 82.7% and 96.0%.</p>
+          <div class="claim-stat">Catapult: 11.0% ReAct → 82.7% HExA</div>
+        </a>
+        <a class="claim-card" href="#exp-main">
+          <div class="claim-h">Better than memory baselines, with fewer tokens</div>
+          <p>HExA beats Episodic RAG, MemRL, ACE and ReasoningBank while injecting a compact bank and using fewer turns per instance.</p>
+          <div class="claim-stat">Catapult: 2.4k tokens/episode vs 6.5k&ndash;10.1k for RAG / MemRL / ACE</div>
+        </a>
+        <a class="claim-card" href="#beyond">
+          <div class="claim-h">Gains hold beyond physics puzzles</div>
+          <p>Interactive games, reasoning &amp; planning, DiscoverPhysics law discovery, and LIBERO-PRO robot manipulation.</p>
+          <div class="claim-stat">Best in 15 of 16 task&ndash;actor settings</div>
+        </a>
+        <a class="claim-card" href="#ablations">
+          <div class="claim-h">Evolving skills beats summarizing or appending</div>
+          <p>Hiding the bank during collection, reverting skills to their first versions, replacing them with a summary, or only appending all lower held-out success.</p>
+          <div class="claim-stat">82.7% vs 48.0&ndash;63.3% for the ablations</div>
+        </a>
+        <a class="claim-card" href="#transfer">
+          <div class="claim-h">Hierarchical skills transfer to unseen tasks</div>
+          <p>Merging banks from three easier levels lifts catapult with no catapult trajectories; on Mastermind a transferred bank beats within-task HExA.</p>
+          <div class="claim-stat">Catapult: 11% → 42.7% · Mastermind: .933</div>
+        </a>
+        <a class="claim-card" href="#exp-grpo">
+          <div class="claim-h">In-context learning vs. weight updates</div>
+          <p>With the same 50 training instances, HExA outperforms GRPO post-training of the same Qwen-2.5-3B model after its first epoch.</p>
+          <div class="claim-stat">DtE 23.3% vs 20% · TBP 12.0% vs 6%</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- ABSTRACT                                                     -->
+  <!-- ============================================================ -->
+  <section class="section section--alt" id="abstract">
     <div class="container container--narrow">
       <h2 class="section-title">Abstract</h2>
       <p>
@@ -129,9 +170,9 @@
       <p>
         We evaluate HExA on multi-step reasoning, interactive partially observable games, and physics law
         discovery tasks. To further evaluate when active experimentation is especially necessary, we introduce
-        <strong>Interphyre</strong>, a set of hard procedural physics tasks where we enable tool-calling and
+        <strong>InterPhyre</strong>, a set of hard procedural physics tasks where we enable tool-calling and
         intervention APIs. Current frontier LLMs including GPT-6 Astra fail in these settings: on the most
-        challenging Interphyre tasks, we show that HExA can enable such models to near 100% success. Moreover,
+        challenging InterPhyre tasks, we show that HExA can enable such models to near 100% success. Moreover,
         HExA improves token efficiency compared to naive agentic and memory baselines and enables generalization
         via hierarchical skill transfer from easier to harder tasks.
       </p>
@@ -139,23 +180,71 @@
   </section>
 
   <!-- ============================================================ -->
-  <!-- INTERPHYRE ENVIRONMENT + LEVEL GALLERY                       -->
+  <!-- INTERPHYRE: TESTBED FOR LEARNING THROUGH EXPERIMENTATION     -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="interphyre">
+
+  <section class="section" id="interphyre">
     <div class="container">
-      <h2 class="section-title">The Interphyre Environment</h2>
+      <h2 class="section-title">InterPhyre: A Testbed for Learning through Experimentation</h2>
       <p class="lead container--narrow">
-        Interphyre is a 2D procedural physics benchmark, built on PHYRE level designs, so that solving a task <em>requires</em>
-        interaction, not recall. In every level the agent places a red ball at <code>(x, y, r)</code>; the
-        simulator then runs forward and checks a level-specific success predicate. The catch: outcomes depend on
-        contact chains, lever mechanics, and collision timing that <strong>cannot be read off a static scene
-        description</strong> &mdash; the agent must run experiments to discover them. The curriculum ships
-        <strong>25 levels &times; 10,000 pre-validated seeds = 250,000 certified task instances</strong>, plus a
-        snapshot/restore intervention API for paired counterfactual rollouts.
+        Most benchmarks only ask whether an agent can solve a task. Learning by experimentation needs an environment
+        the agent can <em>interact with to gather evidence</em>: inspect the current instance, test interventions,
+        observe intermediate dynamics, diagnose failures, and reuse what it learned on future seeds and levels.
+        <strong>InterPhyre</strong> provides this in a controlled 2D physics domain with continuous actions and
+        long-horizon causal structure. Each task asks the agent to place a red ball at <code>(x, y, r)</code>, after
+        which the simulator checks a level-specific success predicate. Successful placements hinge on contact chains,
+        lever mechanics, collision timing and strategy-dependent dynamics that even strong LLMs cannot reliably
+        anticipate from a scene description alone. InterPhyre is therefore both a benchmark and a diagnostic
+        environment for experimentation-based methods such as HExA.
       </p>
 
+      <div class="cap-grid">
+        <div class="cap-card">
+          <div class="cap-h">Snapshot / restore interventions</div>
+          <p>Snapshot any running simulation at a physical event and branch it into paired factual and counterfactual
+          rollouts that share a bit-identical prefix and differ only in one controlled perturbation.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-h">Levels as code, physics as inputs</div>
+          <p>Levels are Python classes. Gravity, friction, restitution and density are configuration fields, so physics
+          can be varied while the scene and seed stay fixed. 25 levels &times; 10,000 oracle-verified seeds =
+          <strong>250,000 certified task instances</strong>.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-h">LLM-native tool interface</div>
+          <p>The simulator and intervention API are exposed as tool calls an LLM agent invokes directly, next to a
+          gymnasium interface and symbolic, image, or combined observation modes.</p>
+        </div>
+      </div>
+
+      <h3 class="subhead">Paired counterfactuals from a shared physical state</h3>
+      <figure class="chart-fig">
+        <img src="assets/figures/interphyre_snapshot_restore.png" alt="Snapshot/restore on catapult seeds 8 and 5: the same intervention has opposite causal effects under different strategies" loading="lazy" />
+        <figcaption><strong>InterPhyre's snapshot/restore API</strong> branches a shared mid-trajectory state into a factual
+        rollout and perturbed alternatives. Each row is one seed of <code>catapult</code> with a different oracle strategy;
+        the teal curve is the green ball's trajectory. <em>Top (seed 8, deflector strategy):</em> removing the deflector
+        causes failure; shrinking the red ball does not. <em>Bottom (seed 5, direct launch):</em> shrinking the red ball
+        causes failure; removing the deflector does not. Causal relevance is a property of an object <em>relative to the
+        active strategy</em>, not of the object in isolation.</figcaption>
+      </figure>
+
+      <h3 class="subhead">A curriculum of 25 levels</h3>
+      <p class="container--narrow">
+        The curriculum spans gravity-driven drops, collision chains, balancing, pendulums and aperture navigation.
+        Every level ships with 10,000 seeds, each certified solvable by an exhaustive oracle search over a discretized
+        action grid, so up to the grid resolution every evaluation failure is attributable to the agent. New levels or
+        seed ranges can be certified offline in the same way.
+      </p>
+      <figure class="chart-fig">
+        <img src="assets/figures/interphyre_levels.png" alt="Eight of the 25 canonical InterPhyre levels at their initial state" loading="lazy" />
+        <figcaption>Eight of the 25 canonical levels at their initial state: <code>down_to_earth</code> (gravity-driven drop
+        past an obstruction), <code>catapult</code> (impulse transfer), <code>basket_case</code> (container avoidance),
+        <code>marble_race</code> (rolling dynamics), <code>seesaw</code> (lever balance), <code>the_cradle</code> (pendulum),
+        <code>keyhole</code> (aperture navigation) and <code>tipping_point</code> (unstable equilibrium).</figcaption>
+      </figure>
+
       <!-- ---- LEVEL GALLERY ---- -->
-      <h3 class="subhead">Level gallery</h3>
+      <h3 class="subhead">Levels used in our experiments</h3>
 
       <div class="level-grid">
         <!-- Tier 2 first — these are HExA's primary testbed -->
@@ -232,8 +321,68 @@
         </figure>
       </div>
 
+
+      <h3 class="subhead">Physics parameters are first-class inputs</h3>
+      <p class="container--narrow">
+        Gravity, friction, restitution, density and solver step size are fields on a <code>SimulationConfig</code> passed
+        to the environment, not constants compiled into the engine. Unlike benchmarks that vary physics jointly with
+        level layout, InterPhyre keeps the two independent: a generalization study can hold the level and seed fixed
+        and sweep a single physical parameter.
+      </p>
+      <figure class="chart-fig">
+        <img src="assets/figures/interphyre_physics_sweep.png" alt="Catapult seed 8 under default physics, low gravity, no friction and high restitution with the same action" loading="lazy" />
+        <figcaption><code>catapult</code> (seed 8) under four physics configurations with the <em>same</em> oracle action.
+        Default physics succeeds; reduced gravity overshoots the basket opening; without friction the ball falls short;
+        with high restitution the arm is over-driven and the ball overshoots. Each change of one parameter shifts the
+        action required to solve the level.</figcaption>
+      </figure>
+
+      <div class="chart-2col">
+        <div>
+          <h3 class="subhead">Levels are Python code</h3>
+          <p>Geometry, the action slot and the success condition are ordinary Python; registering the builder makes a
+          new level usable by the same evaluation pipeline, with no package rebuild.</p>
+          <div class="api-block">
+<pre><code><span class="api-fn">@register_level</span>
+def build_level(seed=None, variant=0, scene=None) -&gt; Level:
+    ground = Bar(left=-5, right=5, y=-4.9, thickness=0.2,
+                 color="purple", dynamic=False)
+    green  = Ball(x=0, y=4.0, radius=0.5, color="green", dynamic=True)
+    red    = Ball(x=0, y=0.0, radius=0.4, color="red",   dynamic=True)
+    return Level(
+        name="falling",
+        objects={"green_ball": green, "red_ball": red,
+                 "purple_ground": ground},
+        action_objects=["red_ball"],
+        success_condition=lambda engine: engine.is_in_contact_for_duration(
+            "green_ball", "purple_ground", 3.0),
+    )</code></pre>
+          </div>
+        </div>
+        <div>
+          <h3 class="subhead">Event-driven branch points</h3>
+          <p>Researchers name a physical event rather than a step index; the engine fires when it happens.
+          Triggers compose (<code>on_sequence</code>, <code>on_any</code>).</p>
+          <div class="table-wrap">
+            <table class="results-table results-table--left">
+              <thead><tr><th>Trigger</th><th>Fires when</th></tr></thead>
+              <tbody>
+                <tr><td><code>on_contact(a, b)</code></td><td>Objects <code>a</code> and <code>b</code> touch</td></tr>
+                <tr><td><code>on_contact_duration(a, b, t)</code></td><td>Sustained contact &ge; <code>t</code> s</td></tr>
+                <tr><td><code>on_position_threshold</code></td><td>Object crosses a position</td></tr>
+                <tr><td><code>on_velocity_threshold</code></td><td>Speed crosses a threshold</td></tr>
+                <tr><td><code>at_step(n)</code></td><td>Fixed timestep</td></tr>
+                <tr><td><code>when(predicate)</code></td><td>Custom predicate on the engine</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Perturbations are either <strong>kinematic</strong> (impulse, force, velocity or position override,
+          freeze) or <strong>structural</strong> (add or remove an object).</p>
+        </div>
+      </div>
+
       <!-- ---- TOOL / INTERVENTION API ---- -->
-      <h3 class="subhead">The tool-call &amp; intervention API</h3>
+      <h3 class="subhead">The tool-call interface HExA uses</h3>
       <p class="container--narrow">
         Each level exposes a structured tool surface the agent invokes directly, so that hypothesis testing is
         explicit and measurable. The <em>catapult</em> level, for example, exposes four complementary tools:
@@ -263,15 +412,15 @@
         Other levels add bespoke analysis tools &mdash; <code>compute_intercept_setup()</code> (falling_into_place),
         <code>compute_basket_analysis()</code> (basket_case), <code>get_ramp_center()</code> (pass_the_parcel).
         The same backend exposes a <strong>snapshot/restore</strong> primitive that branches a shared
-        mid-trajectory state into paired counterfactual rollouts (paper Figure 13).
+        mid-trajectory state into paired counterfactual rollouts (shown above).
       </p>
     </div>
   </section>
 
   <!-- ============================================================ -->
-  <!-- METHOD                                                        -->
+  <!-- METHOD                                                       -->
   <!-- ============================================================ -->
-  <section class="section" id="method">
+  <section class="section section--alt" id="method">
     <div class="container container--narrow">
       <h2 class="section-title">How HExA Works</h2>
       <p>
@@ -322,7 +471,7 @@
   <!-- ============================================================ -->
   <!-- EPISODE WALKTHROUGH (ReAct vs HExA)                          -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="walkthrough">
+  <section class="section" id="walkthrough">
     <div class="container">
       <h2 class="section-title">One Episode, Two Agents</h2>
       <p class="lead container--narrow">
@@ -347,42 +496,111 @@
   </section>
 
   <!-- ============================================================ -->
-  <!-- CORE CLAIMS                                                  -->
+  <!-- HEXA VS BASELINES GALLERY                                    -->
   <!-- ============================================================ -->
-  <section class="section" id="claims">
+
+  <section class="section section--alt" id="showcase">
     <div class="container">
-      <h2 class="section-title">Core Claims</h2>
-      <div class="claim-grid">
-        <a class="claim-card" href="#exp-main">
-          <div class="claim-h">Solves the hardest levels frontier models fail</div>
-          <p>Every model, including a random policy, scores 0% zero-shot on catapult and pass_the_parcel. With a frozen HExA skill bank, Claude Sonnet 4.6 reaches 82.7% and 96.0%.</p>
-          <div class="claim-stat">Catapult: 11.0% ReAct → 82.7% HExA</div>
-        </a>
-        <a class="claim-card" href="#exp-main">
-          <div class="claim-h">Better than memory baselines, with fewer tokens</div>
-          <p>HExA beats Episodic RAG, MemRL, ACE and ReasoningBank while injecting a compact bank and using fewer turns per instance.</p>
-          <div class="claim-stat">Catapult: 2.4k tokens/episode vs 6.5k&ndash;10.1k for RAG / MemRL / ACE</div>
-        </a>
-        <a class="claim-card" href="#beyond">
-          <div class="claim-h">Gains hold beyond physics puzzles</div>
-          <p>Interactive games, reasoning &amp; planning, DiscoverPhysics law discovery, and LIBERO-PRO robot manipulation.</p>
-          <div class="claim-stat">Best in 15 of 16 task&ndash;actor settings</div>
-        </a>
-        <a class="claim-card" href="#ablations">
-          <div class="claim-h">Evolving skills beats summarizing or appending</div>
-          <p>Hiding the bank during collection, reverting skills to their first versions, replacing them with a summary, or only appending all lower held-out success.</p>
-          <div class="claim-stat">82.7% vs 48.0&ndash;63.3% for the ablations</div>
-        </a>
-        <a class="claim-card" href="#transfer">
-          <div class="claim-h">Hierarchical skills transfer to unseen tasks</div>
-          <p>Merging banks from three easier levels lifts catapult with no catapult trajectories; on Mastermind a transferred bank beats within-task HExA.</p>
-          <div class="claim-stat">Catapult: 11% → 42.7% · Mastermind: .933</div>
-        </a>
-        <a class="claim-card" href="#exp-grpo">
-          <div class="claim-h">In-context learning vs. weight updates</div>
-          <p>With the same 50 training instances, HExA outperforms GRPO post-training of the same Qwen-2.5-3B model after its first epoch.</p>
-          <div class="claim-stat">DtE 23.3% vs 20% · TBP 12.0% vs 6%</div>
-        </a>
+      <h2 class="section-title">HExA vs. Baselines, Episode by Episode</h2>
+      <p class="lead container--narrow">
+        Held-out instances where HExA succeeds and the strongest memory baseline fails, with the <em>same</em> actor model
+        on both sides. InterPhyre episodes are replayed in the simulator from each agent's logged placement; the other
+        benchmarks are drawn directly from the evaluation logs.
+      </p>
+
+      <div class="gallery-tabs">
+        <input type="radio" name="gal-tab" id="gal-ip" class="tab-radio" checked>
+        <input type="radio" name="gal-tab" id="gal-games" class="tab-radio">
+        <input type="radio" name="gal-tab" id="gal-core" class="tab-radio">
+        <input type="radio" name="gal-tab" id="gal-disc" class="tab-radio">
+
+        <div class="tab-label-row">
+          <label for="gal-ip" class="tab-label">InterPhyre</label>
+          <label for="gal-games" class="tab-label">Maze &amp; Mastermind</label>
+          <label for="gal-core" class="tab-label">Reasoning (CORE)</label>
+          <label for="gal-disc" class="tab-label">DiscoverPhysics</label>
+        </div>
+
+        <!-- InterPhyre: HExA vs ReasoningBank -->
+        <div class="tab-panel gal-panel--ip">
+          <p class="gal-note">Baseline: <strong>ReasoningBank</strong>. The red ball is the agent's final placement (for the
+          baseline, its last valid simulated placement after the 25-iteration budget).</p>
+          <figure class="gif-fig">
+            <img src="assets/showcase/interphyre_catapult_claude.gif" alt="Catapult seed 68: HExA solves, ReasoningBank fails" loading="lazy" />
+            <figcaption><strong>catapult</strong>, Claude Sonnet 4.6, held-out seed 68. HExA solves it in all 3 runs;
+            ReasoningBank fails it in all 3.</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/interphyre_pass_the_parcel_claude.gif" alt="Pass the Parcel seed 62: HExA solves, ReasoningBank fails" loading="lazy" />
+            <figcaption><strong>pass_the_parcel</strong>, Claude Sonnet 4.6, seed 62. HExA solves it in both evaluations;
+            ReasoningBank fails it in 2 of 3 runs (a failing run is shown).</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/interphyre_down_to_earth_qwen7b.gif" alt="Down to Earth seed 84: HExA solves, ReasoningBank fails" loading="lazy" />
+            <figcaption><strong>down_to_earth</strong>, Qwen-2.5-7B, seed 84. HExA solves it with all 3 independently built
+            banks; ReasoningBank fails it in 4 of 6 runs (k = 1 and k = 5; a k = 5 run is shown).</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/interphyre_two_body_problem_qwen7b.gif" alt="Two Body Problem seed 90: HExA solves, ReasoningBank fails" loading="lazy" />
+            <figcaption><strong>two_body_problem</strong>, Qwen-2.5-7B, seed 90. HExA solves it in all 3 evaluations;
+            ReasoningBank fails it in all 6 runs (k = 1 and k = 5).</figcaption>
+          </figure>
+        </div>
+
+        <!-- ORBIT games: HExA vs MemRL -->
+        <div class="tab-panel gal-panel--games">
+          <p class="gal-note">Baseline: <strong>MemRL</strong>. Each instance is played for 3 episodes; agents can carry what
+          they learn from one episode to the next.</p>
+          <figure class="gif-fig">
+            <img src="assets/showcase/orbit_maze_qwen3-8b.gif" alt="Maze with Qwen3-8B: HExA reaches the goal, MemRL does not" loading="lazy" />
+            <figcaption><strong>Maze</strong>, Qwen3-8B. HExA reaches the goal in every episode (the last two along the
+            shortest path); MemRL never reaches it in any of its 3 runs. Grey cells were never observed by either agent.</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/orbit_maze_gpt-oss-120b.gif" alt="Maze with gpt-oss-120b: HExA reaches the goal, MemRL does not" loading="lazy" />
+            <figcaption><strong>Maze</strong>, gpt-oss-120b. HExA solves this maze in all 3 runs; MemRL in none.</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/orbit_mastermind_qwen3-8b.gif" alt="Mastermind with Qwen3-8B: HExA cracks the code, MemRL does not" loading="lazy" />
+            <figcaption><strong>Mastermind</strong>, Qwen3-8B. HExA uses the peg feedback from earlier episodes to crack the
+            code; it solves this instance in all 6 of its runs, MemRL in none of its 3.</figcaption>
+          </figure>
+        </div>
+
+        <!-- CORE: HExA vs MemRL -->
+        <div class="tab-panel gal-panel--core">
+          <p class="gal-note">Baseline: <strong>MemRL</strong>, actor gpt-oss-120b. In every example HExA is correct in all 3
+          evaluation runs and MemRL is wrong in all 3.</p>
+          <figure class="gif-fig">
+            <img src="assets/showcase/core_tower_of_hanoi_gptoss.gif" alt="Tower of Hanoi: HExA reaches the goal, MemRL makes an illegal move" loading="lazy" />
+            <figcaption><strong>Tower of Hanoi</strong>: six disks from a mid-game state to the goal. HExA's 14-move plan is
+            legal and reaches the goal; MemRL's plan makes an illegal move.</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/core_zebralogic_gptoss.gif" alt="ZebraLogic: HExA's grid is fully correct, MemRL has three wrong cells" loading="lazy" />
+            <figcaption><strong>ZebraLogic</strong>: a 5 &times; 6 logic-grid puzzle. Wrong cells are highlighted in red.</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/core_mathgap_gptoss.gif" alt="MathGAP: HExA answers 14 (correct), MemRL answers 11" loading="lazy" />
+            <figcaption><strong>MathGAP</strong>: a deep arithmetic word problem.</figcaption>
+          </figure>
+          <figure class="gif-fig">
+            <img src="assets/showcase/core_matchstick_gptoss.gif" alt="Matchstick equations: HExA finds the valid answer, MemRL does not" loading="lazy" />
+            <figcaption><strong>Matchstick equations</strong>: move one matchstick to make a Roman-numeral equation true.</figcaption>
+          </figure>
+        </div>
+
+        <!-- DiscoverPhysics: HExA vs MemRL -->
+        <div class="tab-panel gal-panel--disc">
+          <p class="gal-note">Baseline: <strong>MemRL</strong>, actor Claude Sonnet 5; explanations scored by an independent
+          judge (Claude Opus 4.6).</p>
+          <figure class="gif-fig">
+            <img src="assets/showcase/discoverphysics_circle_sonnet5.gif" alt="DiscoverPhysics circle world: HExA recovers the force law, MemRL does not" loading="lazy" />
+            <figcaption><strong>DiscoverPhysics, circle world</strong>, seed 300. Both agents design experiments and then submit
+            a law. HExA's law predicts the dynamics almost exactly (normalized MSE 2&times;10<sup>&minus;6</sup>, judge score 1.0)
+            and passes in all 3 runs; MemRL's does not (MSE 4.0, judge score 0.5) and fails in all 3.</figcaption>
+          </figure>
+        </div>
       </div>
     </div>
   </section>
@@ -390,9 +608,9 @@
   <!-- ============================================================ -->
   <!-- EXPERIMENTS & RESULTS                                        -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="experiments">
+  <section class="section" id="experiments">
     <div class="container">
-      <h2 class="section-title">Results on Interphyre</h2>
+      <h2 class="section-title">Results on InterPhyre</h2>
       <p class="lead container--narrow">
         HExA builds its skill bank on 5 warm-start and 51 training seeds (17 rounds &times; 3 seeds), then the bank is
         <strong>frozen</strong> and evaluated on <strong>50 held-out seeds</strong>. Every method gets the same
@@ -490,9 +708,9 @@
   <!-- ============================================================ -->
   <!-- BEYOND INTERPHYRE                                            -->
   <!-- ============================================================ -->
-  <section class="section" id="beyond">
+  <section class="section section--alt" id="beyond">
     <div class="container">
-      <h2 class="section-title">Beyond Interphyre</h2>
+      <h2 class="section-title">Beyond InterPhyre</h2>
       <p class="lead container--narrow">
         The same build-then-freeze protocol on four more benchmark families: interactive partially observable games
         (Mastermind, Maze), reasoning &amp; planning (MathGAP, ZebraLogic, Tower of Hanoi, Matchstick), physics law
@@ -556,7 +774,7 @@
   <!-- ============================================================ -->
   <!-- ABLATIONS                                                    -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="ablations">
+  <section class="section" id="ablations">
     <div class="container">
       <h2 class="section-title">What Drives the Gain</h2>
 
@@ -609,7 +827,7 @@
   <!-- ============================================================ -->
   <!-- CROSS-LEVEL TRANSFER                                         -->
   <!-- ============================================================ -->
-  <section class="section" id="transfer">
+  <section class="section section--alt" id="transfer">
     <div class="container">
       <h2 class="section-title">Hierarchical Skills Transfer to Unseen Tasks</h2>
       <p class="lead container--narrow">
@@ -649,7 +867,7 @@
   <!-- ============================================================ -->
   <!-- SKILL BANK VIEWER                                            -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="skills">
+  <section class="section" id="skills">
     <div class="container">
       <h2 class="section-title">Inside the Skill Bank</h2>
       <p class="lead container--narrow">
@@ -1098,7 +1316,7 @@
   <!-- ============================================================ -->
   <!-- BIBTEX                                                       -->
   <!-- ============================================================ -->
-  <section class="section" id="bibtex">
+  <section class="section section--alt" id="bibtex">
     <div class="container container--narrow">
       <h2 class="section-title">BibTeX</h2>
       <pre><code>@misc{chandra2026hierarchicalexperimentalistagents,
