@@ -1,0 +1,145 @@
+{
+  "general_skills": [],
+  "level_skills": {
+    "pass_the_parcel": [
+      {
+        "skill_id": "pas_ev_7_000",
+        "title": "Direct Lateral Sidewall Hit: Side Selection and y Fallback Sequence",
+        "principle": "Place the red ball at x=basket_x\u00b10.5 (left side if blue is left, right side if blue is right) to deliver lateral impulse to the basket sidewall. Default y=2.0; if blocked by green, try y=2.1, y=2.3, then y=3.0 in order. When basket is at negative y (< 0), y=2.0 is 2+ units above the basket and produces glancing contact \u2014 start at y=0.5 or y=1.0 instead.",
+        "when_to_apply": "First action each episode. If basket_y < 0: try x=basket_x\u00b10.5, y=0.5 (or y=1.0 if blocked by green), r=0.7. If basket_y > 0: start at y=2.0; if blocked by green, try y=2.1, y=2.3, y=3.0. Always choose the side opposite blue ball.",
+        "example": "Seed 52: basket at y=-0.784, y=2.0 barely moved basket, y=0.5 r=0.7 \u2192 SUCCESS. Seed 53: basket at y=1.066, y=2.0 and y=2.1 blocked by green, y=2.3 r=0.7 \u2192 SUCCESS. Seed 49: basket at y=0.3, x=basket_x-0.5, y=2.0, r=0.7 \u2192 SUCCESS in 1 try.",
+        "source_level": "pass_the_parcel",
+        "source_type": "evolved",
+        "source_seeds": [
+          44,
+          48,
+          49,
+          51,
+          52,
+          53
+        ],
+        "generation": 7,
+        "confidence": 0.78
+      },
+      {
+        "skill_id": "pas_ev_7_001",
+        "title": "Radius r=0.7 Default; Escalate to r=1.0 Before r=1.2 Only When Basket Actually Moved",
+        "principle": "r=0.7 provides sufficient momentum to dislodge the basket while keeping green's lateral travel within ~1.5 units. When r=0.7 strands green \u2014 meaning the basket moved >0.3 units but green stayed \u2014 escalate to r=1.0 at the same x and y. Escalate to r=1.2 only if r=1.0 also strands green. Never use r>1.2. Critically: if basket barely moved (<0.12 units) with r=0.7, radius escalation will not help \u2014 the contact angle is wrong; change y instead.",
+        "when_to_apply": "Default r=0.7 for all sidewall hits. If basket moved >0.3 units but green stayed: try r=1.0 at same x and y. If r=1.0 also strands green: use r=1.2. Do not use r>1.2. If basket moved <0.12 units: do NOT escalate radius \u2014 lower y instead (see 'Lower y' skill).",
+        "example": "Seed 48: r=0.7 at y=2.0 \u2192 SUCCESS. Seed 39: r=0.7 and r=1.0 stranded green, r=1.2 \u2192 SUCCESS. Seed 34: r=1.2 overshot; r=1.0 \u2192 SUCCESS. Seed 51: basket moved <0.12 units at r=0.7/1.0/1.2 \u2014 radius escalation failed; y=1.0 r=0.7 succeeded.",
+        "source_level": "pass_the_parcel",
+        "source_type": "evolved",
+        "source_seeds": [
+          34,
+          39,
+          48,
+          49,
+          51
+        ],
+        "generation": 7,
+        "confidence": 0.83
+      },
+      {
+        "skill_id": "pas_ev_6_002",
+        "title": "Switch to Opposite Side When Hit Direction Misaligns with Blue",
+        "principle": "When blue is to the LEFT of the basket, use a LEFT-side hit (x=basket_x-0.5) so the basket flies right while green falls left toward blue. A right-side hit in this configuration sends green rightward, away from blue. The hit side also determines basket flyout direction, which must clear green's fall path by >0.7 units horizontally.",
+        "when_to_apply": "Before placing: if blue_x < basket_x, use x=basket_x-0.5. If blue_x > basket_x, use x=basket_x+0.5. After any failed attempt where green overshoots opposite to blue: switch sides.",
+        "example": "Seed 52: blue at x=-1.064 (left), used x=-0.118 (basket_x-0.5), y=0.5, r=0.7 \u2192 SUCCESS. Seed 53: blue at x=-0.703 (left), used x=0.154 (basket_x-0.5), y=2.3, r=0.7 \u2192 SUCCESS. Seed 45: right-side sent green to x=3.368 while blue at x=-1.179; left-side SUCCESS.",
+        "source_level": "pass_the_parcel",
+        "source_type": "evolved",
+        "source_seeds": [
+          45,
+          48,
+          49,
+          51,
+          52,
+          53
+        ],
+        "generation": 7,
+        "confidence": 0.82
+      },
+      {
+        "skill_id": "pas_ev_2_002",
+        "title": "Basket Must Clear Green's Fall Path by >0.7 Units Horizontally",
+        "principle": "After the inverted basket is knocked off, if its final x is within ~0.6 units of green's fall trajectory x, it physically catches green mid-fall and deflects it away from blue. All successful runs show displaced basket x differs from green's landing x by at least 0.8 units. Choose the hit side so the basket flies opposite to green's expected fall direction.",
+        "when_to_apply": "After any failed attempt where green stops at mid-fall height, check if displaced basket x is within 0.6 units of green's x. If so, the basket blocked green \u2014 change hit side to send basket further away, targeting >0.7 units horizontal clearance.",
+        "example": "Seed 48: basket x=1.145, green x=-1.239, separation 2.38 \u2192 SUCCESS. Seed 51 ramp failure: basket x=-1.232 vs green x=-1.797, separation 0.565 < 0.7 \u2192 FAILURE; y=1.0 hit: basket x=0.204 vs green x=-2.069, separation 1.865 \u2192 SUCCESS.",
+        "source_level": "pass_the_parcel",
+        "source_type": "evolved",
+        "source_seeds": [
+          47,
+          48,
+          49,
+          51
+        ],
+        "generation": 7,
+        "confidence": 0.78
+      },
+      {
+        "skill_id": "pas_ev_7_004",
+        "title": "Lower y (0.5-1.7) for Direct Sidewall Contact When Basket Barely Moves",
+        "principle": "When high-y hits (y\u22652.0) move the basket <0.12 units, the red ball is contacting at a glancing angle from far above. Lowering y to near the basket's actual height delivers direct horizontal impulse. Try y=0.5 first; if blocked by green, try y=1.0; if also blocked, try y=1.3, y=1.5, y=1.7 in sequence. Keep r=0.7 when changing y.",
+        "when_to_apply": "After any y\u22652.0 hit moves the basket <0.12 units: immediately switch to y=0.5 at the same x, r=0.7. If y=0.5 is blocked by green, try y=1.0. If y=1.0 blocked, try y=1.3, y=1.5, y=1.7. Only switch to ramp if all of y=0.5 through y=1.7 are blocked by green or platform.",
+        "example": "Seed 52: basket at y=-0.784, y=2.0 barely moved basket, y=0.5 r=0.7 \u2192 SUCCESS. Seed 51: basket at y=-0.243, y=2.0 barely moved (<0.12 units) across all radii, y=0.5 blocked by green, y=1.0 r=0.7 \u2192 SUCCESS. Seed 47: y=2.0 moved basket only 0.078 units; y=0.5 r=0.7 \u2192 SUCCESS.",
+        "source_level": "pass_the_parcel",
+        "source_type": "evolved",
+        "source_seeds": [
+          29,
+          36,
+          47,
+          51,
+          52
+        ],
+        "generation": 7,
+        "confidence": 0.77
+      },
+      {
+        "skill_id": "pas_ev_7_007",
+        "title": "Ramp Approach When All Direct Sidewall Heights Are Blocked",
+        "principle": "When green's position blocks direct-side placements at y=2.0-3.0 AND platform blocks y=0.5-1.0, place the red ball on the ramp at x=3.5, y=4.0, r=0.7. The ball rolls down and delivers a right-side hit at platform level. Note: ceiling at y=5.0 means y+r must stay \u22645.0. Ramp success requires basket to fly >0.7 units from green's fall path.",
+        "when_to_apply": "Only after all direct sidewall heights (y=0.5 through y=3.0) are invalid due to green or platform overlap: try x=3.5, y=4.0, r=0.7. If ramp fails due to basket blocking green, the ramp delivers a right-side hit \u2014 check basket clearance and consider whether direct left-side hit at a very low y is feasible instead.",
+        "example": "Seed 50: all left-side y=2.0-3.0 blocked by green, platform top=0.947 blocked y=0.5; x=3.5, y=4.0, r=0.7 \u2192 SUCCESS. Seed 51: ramp at x=3.5, y=4.0 failed (0 steps, out of bounds for that config); x=3.0, y=4.2 also failed (basket blocked green, separation 0.565).",
+        "source_level": "pass_the_parcel",
+        "source_type": "evolved",
+        "source_seeds": [
+          50,
+          51
+        ],
+        "generation": 7,
+        "confidence": 0.58
+      }
+    ]
+  },
+  "common_mistakes": [],
+  "level_mistakes": {
+    "pass_the_parcel": [
+      {
+        "mistake_id": "pas_err_000",
+        "description": "Agent escalates directly to r=1.2, r=1.5, or r=2.0 when r=0.7 strands green, causing green to overshoot far past blue.",
+        "why_it_happens": "When r=0.7 strands green, agents jump to large radii seeking a stronger hit. But r=1.2+ delivers too much lateral momentum \u2014 Seed 34 shows r=1.2 sent green to x=3.128 while blue was at x=-1.208 (4.3-unit gap).",
+        "how_to_avoid": "When r=0.7 strands green (basket moved >0.3 units but green stayed at platform height), try the same x and y with r=1.0 next. Only use r=1.2 if r=1.0 also strands green. Never use r>1.2. Seed 34 success: x=1.45, y=2.0, r=1.0 landed green near blue.",
+        "source_level": "pass_the_parcel",
+        "source_seeds": [],
+        "generation": 7
+      },
+      {
+        "mistake_id": "pas_err_001",
+        "description": "Agent places the red ball directly above the inverted basket expecting downward force to dislodge it, but the ball lands on the basket's solid top surface and sits there.",
+        "why_it_happens": "The inverted basket's solid base faces upward; a ball dropped from above simply rests on the surface without delivering lateral impulse to eject green.",
+        "how_to_avoid": "Place the red ball to the SIDE of the basket: x=basket_x+0.5 or x=basket_x-0.5. Choose y near basket height (y=0.5 if basket_y<0, else y=2.0), r=0.7. Contact must be at the basket SIDEWALL. Seeds 48 and 49 succeeded with x=basket_x-0.5, y=2.0; Seed 52 with y=0.5; Seed 51 with y=1.0.",
+        "source_level": "pass_the_parcel",
+        "source_seeds": [],
+        "generation": 7
+      },
+      {
+        "mistake_id": "pas_evo_002",
+        "description": "Agent exhausts radius escalations (r=0.7, r=1.0, r=1.2) at the same high y when the basket barely moves, failing to recognize that the contact angle \u2014 not the force \u2014 is the problem.",
+        "why_it_happens": "When y=2.0 barely moves the basket, agents try r=1.0 then r=1.2 at the same height. But if the basket center is 2+ units below the red ball's y, all placements produce glancing contact regardless of radius. Seed 51: basket moved only 0.006-0.105 units across r=0.7, r=1.0, r=1.2 all at y=2.0.",
+        "how_to_avoid": "If basket moved <0.12 units after a y=2.0 r=0.7 hit, do NOT try r=1.0 or r=1.2 at y=2.0. Immediately lower y: try y=0.5 at the same x with r=0.7 (if not blocked by green or platform). If y=0.5 is blocked by green, try y=1.0. Seed 51 success: x=-1.1033, y=1.0, r=0.7 after y=2.0 failed across all three radii.",
+        "source_level": "pass_the_parcel",
+        "source_seeds": [],
+        "generation": 8
+      }
+    ]
+  }
+}

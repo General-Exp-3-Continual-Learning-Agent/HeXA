@@ -1,0 +1,223 @@
+{
+  "general_skills": [],
+  "level_skills": {
+    "catapult": [
+      {
+        "skill_id": "cat_ev_9_000",
+        "title": "Right-of-Pivot Arm Strike Zone (x\u22480.2\u20130.5 Default)",
+        "principle": "Placing the red ball at x\u22480.2\u20130.5 on the right half of the catapult arm creates a downward force that lifts the green ball in a rightward arc toward the basket. x=0.3 is the default starting point; x=0.2 at standard y reduces range ~1.3 units. Shifting x rightward (\u22650.5) at standard-y positions risks diminishing returns.",
+        "when_to_apply": "Default for all catapult strikes; start with x=0.3. At moderate elevated y (\u22480.5), decreasing x below 0.3 increases range (see leftward-x skill). Do not exceed x\u22480.5 without checking for diminishing returns.",
+        "example": "Seed 43: x=0.3 y=-0.5 \u2192 green at x=3.10, success. Seed 48: x=0.3 y=0.3 \u2192 success. Seed 51: x=0.3 y=0.0 \u2192 success.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          43,
+          48,
+          49,
+          51,
+          52,
+          53
+        ],
+        "generation": 11,
+        "confidence": 0.93
+      },
+      {
+        "skill_id": "cat_ev_6_001",
+        "title": "Low Drop (y\u2248\u22120.5 to 0.0) Maximizes Range; Binary-Search y First",
+        "principle": "Drop height y is the primary range control: y\u2248\u22120.5 produces maximum range, y\u22480.0 produces moderate range, y\u22480.3\u20130.5 produces reduced range. A \u00b10.25 change in y at standard heights shifts landing x by 1.5\u20132.0 units. When standard y (\u22640.0) is blocked, the operative range shifts to y=0.25\u20130.5, where lower y still produces more range.",
+        "when_to_apply": "Default for all seeds; start at y=-0.5, then binary-search toward y=0.0 if overshooting. If gray_ball blocks all y\u22640.0, shift to y=0.5 as first valid placement, then binary-search DOWN to y=0.3 or y=0.25 to increase range. Use y=-0.25 as first midpoint in standard regime.",
+        "example": "Seed 49: y=-0.5 blocked, y=0.0\u2192x=4.26 (overshoot), y=0.25\u2192x=3.71, success. Seed 53: y=0.0\u2192x=4.45, y=0.25\u2192x=4.19, y=0.5\u2192x=4.17 (y-dominant regime detected).",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          48,
+          49,
+          51,
+          53
+        ],
+        "generation": 11,
+        "confidence": 0.93
+      },
+      {
+        "skill_id": "cat_ev_11_002",
+        "title": "Overlap Fallback Sequence: y=-0.5 \u2192 y=0.0 \u2192 y=0.5 \u2192 Binary-Search y=0.3\u20130.5",
+        "principle": "When y=-0.5 is blocked, try y=0.0, then y=0.5 with r=2.0. Once a valid placement at y=0.5 is confirmed, binary-search DOWNWARD within y=0.3\u20130.5 to fine-tune range, since lower y in this zone still increases range. Only escalate to y=1.0 if y=0.3 is also blocked or all y=0.3\u20130.5 attempts miss by more than 1 unit.",
+        "when_to_apply": "When predict_first_contact returns invalid for y=-0.5; follow sequence y=0.0 \u2192 y=0.5 r=2.0 \u2192 binary-search y=0.3\u20130.5. Skip x=1.0 at y=1.0 always. For elevated green ball scenes (y\u2265-0.5), standard y slots may all be blocked and sequence starts at y=1.0.",
+        "example": "Seed 48: y=-0.5/0.0 blocked \u2192 y=0.5 (x=2.37 undershoot) \u2192 y=0.3 (x=3.14, success). Seed 51: y=-0.5 blocked \u2192 y=0.0 valid (gap 0.21, success). Seed 52: y=-0.5/0.0 blocked \u2192 y=0.5 undershoot \u2192 bisect down.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          48,
+          50,
+          51,
+          52,
+          53
+        ],
+        "generation": 11,
+        "confidence": 0.91
+      },
+      {
+        "skill_id": "cat_ev_11_003",
+        "title": "Trace-then-Simulate: Gap Threshold, Bisect Chaotic Cliffs, Simulate Narrow Boundary",
+        "principle": "At standard drop heights (y\u22640.0), commit to simulate when gap is under 0.8 units. At elevated heights (y=0.25\u20130.5), commit at gap <0.5. When a chaotic cliff is detected in y=0.3\u20130.5, bisect to the midpoint rather than simulating immediately. After bisection has narrowed the cliff to \u0394y\u22640.01 (minimum resolution), simulating the overshoot boundary IS valid\u2014the green ball can contact the blue ball during its arc even if the final resting position overshoots.",
+        "when_to_apply": "At y\u22640.0: gap <0.8 \u2192 simulate. At y=0.25\u20130.5: gap <0.5 \u2192 simulate. If chaotic cliff: bisect first. Once \u0394y\u22640.01 and no gap reduction is possible, simulate the overshoot side\u2014arc contact is achievable at that boundary.",
+        "example": "Seed 51: gap ~0.21 at y=0.0 \u2192 success. Seed 52: cliff at y=0.34/0.35 after full bisection \u2192 simulated y=0.34 (overshoot) \u2192 success via arc contact.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          49,
+          50,
+          51,
+          52
+        ],
+        "generation": 11,
+        "confidence": 0.87
+      },
+      {
+        "skill_id": "cat_ev_1_005",
+        "title": "Seed-Dependent Scene Geometry Requires Per-Seed Calibration",
+        "principle": "Arm height, pivot position, blue ball position, green ball starting position, and arm tilt vary meaningfully across seeds. If green ball starts at y\u2265-0.5 (elevated), standard low-y drops will be blocked, requiring elevated-y placements starting at y\u22481.0\u20131.1. If blue ball is at y<-3.0, standard r=2.0 placements may produce too flat a trajectory.",
+        "when_to_apply": "Always call describe_scene_geometry first; if green ball y\u2265-0.5, treat as elevated-arm seed requiring y\u22651.0 placements. If first 2\u20133 standard placements show green going left, treat as non-standard geometry seed requiring extra calibration.",
+        "example": "Seed 43: standard geometry \u2192 x=0.3 y=-0.5 \u2192 success in 4 steps. Seed 42: green at y=-0.38 (elevated), standard y blocked, needed y=1.0 x-sweep. Seed 53: blue ball at y=-3.02, needed x=0.1 at y=0.5.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          42,
+          43,
+          51,
+          52,
+          53
+        ],
+        "generation": 11,
+        "confidence": 0.85
+      },
+      {
+        "skill_id": "cat_ev_9_006",
+        "title": "Chaotic Trajectory Zones: Avoid Fine-Tuning in Sensitive Ranges",
+        "principle": "Chaotic zones exist in both y and x dimensions where tiny parameter changes cause large trajectory swings: (1) y\u2248-0.15 to -0.25 at x=0.3; (2) y\u22480.3\u20130.4 at r=2.0 in some seeds (\u0394y=0.1 \u2192 >1.9 range jump); (3) y\u22481.05\u20131.1 at elevated arms; (4) x\u22480.35\u20130.40 at y=0.75. When a chaotic cliff is detected, bisect methodically; the cliff boundary can be as narrow as \u0394y=0.01.",
+        "when_to_apply": "When two consecutive traces with small \u0394 in x or y produce landing positions >1.5 units apart: for y-chaotic cliffs bisect (e.g., try y=0.35 between y=0.3 and y=0.4); for x-chaotic cliffs simulate overshoot side. Do not iterate further within the chaotic range without a clear bisection strategy.",
+        "example": "Seed 44: y=0.5\u2192x=4.50, y=0.7\u2192x=-0.33 (y-cliff). Seed 52: y=0.3\u2192x=4.23, y=0.4\u2192x=2.71 (cliff); bisected to y=0.34/y=0.35 boundary; simulated y=0.34 \u2192 success.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          44,
+          45,
+          50,
+          52
+        ],
+        "generation": 11,
+        "confidence": 0.91
+      },
+      {
+        "skill_id": "cat_ev_6_009",
+        "title": "Identical Range at Different x/r Signals y-Dominant Regime",
+        "principle": "When trace_green_ball returns nearly identical green ball landing positions despite changing x or radius, the scene is in a y-dominant regime where drop height controls range. Stop iterating x or r and switch to y-binary-search or x-sweep at a different y level. If lower y is blocked, try x<0.3 at moderate elevated y (\u22480.5) to escape the regime.",
+        "when_to_apply": "When two consecutive traces with different x or r values produce landing positions within 0.2 units of each other; immediately switch to adjusting y. If y is blocked and regime persists at x=0.3, try x=0.1\u20130.2 at y=0.5 to break out.",
+        "example": "Seed 44: x=0.3 and x=0.2 at r=2.0 both \u2192x=4.50. Seed 47: x=0.3 y=0.5 and various r all gave x\u22482.69. Seed 53: y=0.0\u2192x=4.45, y=0.25\u2192x=4.19, y=0.5\u2192x=4.17 (plateau) \u2192 switched to x=0.1 \u2192 success.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          44,
+          47,
+          53
+        ],
+        "generation": 11,
+        "confidence": 0.93
+      },
+      {
+        "skill_id": "cat_ev_10_007",
+        "title": "x=0.2 Escape for Standard-y Chaotic Cliff (y\u22640.0 Only)",
+        "principle": "When y binary-search at standard heights (y\u2248-0.5 to 0.0) reveals that y=-0.5 and y=-0.25 produce identical overshooting landings but y=0.0 flips the green ball far left, shifting x from 0.3 to 0.2 at y=-0.5 reduces range by ~1.3 units. This escape is strictly for standard y (\u22640.0): at elevated y (\u22480.5), x=0.2 increases range (opposite effect).",
+        "when_to_apply": "Only when standard-y (y\u2248-0.5 to 0.0) binary search hits chaotic cliff with both y=-0.5 and y=-0.25 overshooting identically but y=0.0 going far left. Do NOT apply at elevated y (\u22650.5)\u2014use leftward x-sweep there for the opposite (range-increasing) effect.",
+        "example": "Seed 41: x=0.3 y=-0.5\u2192x=4.33, y=-0.25\u2192x=4.33 (identical), y=0.0\u2192x=-4.78; x=0.2 y=-0.5\u2192x=3.05, success.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          41
+        ],
+        "generation": 11,
+        "confidence": 0.85
+      },
+      {
+        "skill_id": "cat_ev_9_009",
+        "title": "Elevated-y Fallback: x=2.0, r=1.5 at y=1.0\u20131.5 as Last Resort",
+        "principle": "When the overlap fallback sequence reaches y\u22651.0 and x-sweep at y=1.0 (0.3\u21920.5) still fails, escalate to x=2.0, r=1.5\u2014not x=1.0 at y=1.0 (INVALID ACTION). At x=2.0, y=1.0, r=1.5, the red ball contacts the arm at a rightward strike point, sending green ball with full range. An alternative for elevated scenes is x=0.3, y=1.1, r=2.0 when x=0.3 y=1.0 is blocked by gray_ball.",
+        "when_to_apply": "After exhausting x-sweep (0.3\u20130.5) at y=1.0 in elevated-arm seeds; use x=2.0 r=1.5 at y=1.0, then y=1.5 if still blocked. Skip x=1.0 at y=1.0 always.",
+        "example": "Seed 36: x=2.0, y=1.0, r=1.5 \u2192 success. Seed 40: x=0.3, y=1.1, r=2.0 \u2192 green at x=4.32, success.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          36,
+          40
+        ],
+        "generation": 11,
+        "confidence": 0.8
+      },
+      {
+        "skill_id": "cat_ev_11_009",
+        "title": "Leftward x Shift (<0.3) at Moderate Elevated y (\u22480.5) Dramatically Increases Range",
+        "principle": "At moderate elevated drop heights (y\u22480.5), decreasing x below 0.3 dramatically increases green ball range\u2014opposite to standard-y behavior. This occurs because at y=0.5 the arm contact geometry changes such that a more central strike delivers more angular momentum to the arm. When stuck in a y-dominant regime with insufficient or excessive range at x=0.3, try x=0.1\u20130.2 at y=0.5 before escalating to y=1.0.",
+        "when_to_apply": "When y=0.5 with x=0.3 produces insufficient range AND lower y is blocked or chaotic; try x=0.2 (binary mid) then x=0.1 at y=0.5. Binary-search x between 0.1 and 0.3 to target blue ball position. Do NOT apply at y\u22651.0.",
+        "example": "Seed 47: x=0.3 y=0.5\u2192x=2.72, x=0.1 y=0.5\u2192x=4.78; x=0.2 y=0.5 simulated \u2192 success. Seed 53: x=0.3 y=0.5\u2192x=4.17 (regime), x=0.1 y=0.5\u2192x=3.63 (gap 0.13) \u2192 success.",
+        "source_level": "catapult",
+        "source_type": "evolved",
+        "source_seeds": [
+          47,
+          53
+        ],
+        "generation": 11,
+        "confidence": 0.72
+      }
+    ]
+  },
+  "common_mistakes": [],
+  "level_mistakes": {
+    "catapult": [
+      {
+        "mistake_id": "cat_err_000",
+        "description": "Fine-tuning x or y in a chaotic zone when trajectory response is nonlinear.",
+        "why_it_happens": "Agents assume monotonic response and keep incrementing when the system is actually sensitive/chaotic.",
+        "how_to_avoid": "When two consecutive traces produce landing positions >1.5 units apart with small \u0394, switch to bisection rather than linear search.",
+        "source_level": "catapult",
+        "source_seeds": [],
+        "generation": 11
+      },
+      {
+        "mistake_id": "cat_err_001",
+        "description": "Using x=1.0 at y=1.0 in elevated-arm scenes.",
+        "why_it_happens": "Agents choose an intermediate x value between 0.3 and 2.0 without checking validity.",
+        "how_to_avoid": "Skip x=1.0 at y=1.0 always; go directly to x=2.0 r=1.5 as the elevated fallback.",
+        "source_level": "catapult",
+        "source_seeds": [],
+        "generation": 11
+      },
+      {
+        "mistake_id": "cat_err_002",
+        "description": "Simulating the overshoot side of a y-chaotic cliff (y=0.3\u20130.5) without bisecting first.",
+        "why_it_happens": "Agents see a near-target landing on overshoot trace and try to simulate without confirming the cliff boundary.",
+        "how_to_avoid": "Always bisect the chaotic cliff first. Only simulate the overshoot boundary after bisection has narrowed to \u0394y\u22640.01 and no further resolution is possible.",
+        "source_level": "catapult",
+        "source_seeds": [],
+        "generation": 11
+      },
+      {
+        "mistake_id": "cat_err_003",
+        "description": "Placing the red ball at x>3 (far right of scene).",
+        "why_it_happens": "Agents try to increase rightward strike force by moving the contact point further right.",
+        "how_to_avoid": "Keep x within 0.1\u20130.5 for standard strikes; x=2.0 is maximum for elevated fallback.",
+        "source_level": "catapult",
+        "source_seeds": [],
+        "generation": 11
+      },
+      {
+        "mistake_id": "cat_err_004",
+        "description": "Treating x=0.2 as a universal range-reducer regardless of drop height.",
+        "why_it_happens": "Agents apply the x=0.2 escape learned at standard y to elevated y situations where x behavior is reversed.",
+        "how_to_avoid": "x=0.2 reduces range only at y\u22640.0. At elevated y (\u22480.5), x=0.2 and x=0.1 INCREASE range\u2014use this deliberately when in a low-range y-dominant regime.",
+        "source_level": "catapult",
+        "source_seeds": [],
+        "generation": 11
+      }
+    ]
+  }
+}
