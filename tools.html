@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InterPhyre Tool Reference &middot; HExA</title>
+  <meta name="description" content="Every tool the HExA agent can call in InterPhyre: shared simulation and state tools and the level-specific analysis tools, with real example outputs." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Google+Sans:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="nav-brand" href="index.html">HExA</a>
+      <div class="nav-links">
+        <a href="index.html#interphyre">&larr; Back to main page</a>
+        <a href="#overview">Overview</a>
+        <a href="#shared">Shared tools</a>
+        <a href="#levels">Level-specific tools</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section" id="overview">
+    <div class="container">
+      <h1 class="section-title">InterPhyre Tool Reference</h1>
+      <p class="lead container--narrow">
+        Every tool the agent can call in InterPhyre. ReAct, HExA and every memory baseline in the paper use exactly this
+        interface. Tools come in two kinds: <span class="tool-kind tool-kind--state">State information</span> tools query the
+        scene without advancing the simulation, and <span class="tool-kind tool-kind--sim">Simulation</span> tools place the red
+        ball at <code>(x, y, r)</code> and run the physics engine. Five shared tools are available on every level; each level adds
+        its own analysis tools. Each tool below shows a real call and its output.
+      </p>
+      <div class="table-wrap container--narrow"><table class="results-table results-table--left"><thead><tr><th>Level</th><th>Shared tools</th><th>Level-specific tools</th></tr></thead><tbody><tr><td><a href="#lv-catapult"><code>catapult</code></a></td><td>all 5</td><td><a href="#tool-describe_scene_geometry"><code>describe_scene_geometry</code></a>, <a href="#tool-predict_first_contact"><code>predict_first_contact</code></a>, <a href="#tool-trace_green_ball"><code>trace_green_ball</code></a>, <a href="#tool-simulate_with_trace"><code>simulate_with_trace</code></a></td></tr><tr><td><a href="#lv-pass_the_parcel"><code>pass_the_parcel</code></a></td><td>all 5</td><td><a href="#tool-get_ramp_center"><code>get_ramp_center</code></a></td></tr><tr><td><a href="#lv-down_to_earth"><code>down_to_earth</code></a></td><td>all 5</td><td><a href="#tool-compute_gap_analysis"><code>compute_gap_analysis</code></a></td></tr><tr><td><a href="#lv-two_body_problem"><code>two_body_problem</code></a></td><td>all 5</td><td><a href="#tool-compute_relative_positions"><code>compute_relative_positions</code></a></td></tr><tr><td><a href="#lv-falling_into_place"><code>falling_into_place</code></a></td><td>all 5</td><td><a href="#tool-compute_intercept_setup"><code>compute_intercept_setup</code></a></td></tr><tr><td><a href="#lv-tipping_point"><code>tipping_point</code></a></td><td>all 5</td><td><a href="#tool-compute_tipping_point_analysis"><code>compute_tipping_point_analysis</code></a></td></tr><tr><td><a href="#lv-basket_case"><code>basket_case</code></a></td><td>all 5</td><td><a href="#tool-compute_basket_analysis"><code>compute_basket_analysis</code></a></td></tr><tr><td><a href="#lv-cliffhanger"><code>cliffhanger</code></a></td><td>all 5</td><td><a href="#tool-compute_cliffhanger_analysis"><code>compute_cliffhanger_analysis</code></a></td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="shared">
+    <div class="container container--narrow">
+      <h2 class="section-title">Shared tools</h2>
+      <p class="lead">Available on every level.</p>
+    <div class="tool-card" id="tool-get_level_state">
+      <div class="tool-head"><code class="tool-sig">get_level_state()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Structured text description of the current scene: name, position, radius (balls), dimensions and angle (bars) and dynamic flag of every object; the world bounds (<i>x, y</i> &isin; [&minus;5, 5]); and the level-specific success condition.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 101)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; get_level_state()</span>
+=== Level State: catapult ===
+
+* green_ball (green Ball): position=(-3.1453, -0.5304), radius=0.2000, dynamic=True
+* blue_ball (blue Ball): position=(3.5000, -2.6884), radius=0.4700, dynamic=True
+* ledge (black Bar): position=(3.5000, -3.5585), left=2.0000, right=5.0000, top=-3.5107, bottom=-3.6063, thickness=0.2000, dynamic=False
+* basket: {&#x27;x&#x27;: 3.5, &#x27;y&#x27;: np.float64(-3.3584055959197294), &#x27;color&#x27;: &#x27;gray&#x27;, &#x27;dynamic&#x27;: True, &#x27;type&#x27;: &#x27;Basket&#x27;, &#x27;angle&#x27;: 1.8255637045882356, &#x27;scale&#x27;: 1.1652265588903115}
+* black_ball (black Ball): position=(-1.1694, 4.6000), radius=0.4000, dynamic=False
+* black_platform (black Bar): position=(-1.8203, -2.4304), left=-3.3203, right=-0.3203, top=-2.4304, bottom=-2.4304, thickness=0.2000, dynamic=False
+* gray_ball (gray Ball): position=(-1.2203, -1.6304), radius=0.7000, dynamic=True
+* gray_platform (gray Bar): position=(-1.2203, -0.8304), left=-3.3453, right=0.9047, top=-0.8304, bottom=-0.8304, thickness=0.2000, dynamic=True
+
+World bounds: x in [-5, 5], y in [-5, 5]
+Action objects: [&#x27;red_ball&#x27;] -- you control the red ball placement
+Success condition: green_ball must touch blue_ball for 3 seconds
+============================================================</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-simulate_action">
+      <div class="tool-head"><code class="tool-sig">simulate_action(x, y, radius)</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">Places the red ball at (<i>x, y</i>) with radius &isin; [0.1, 2.0] and runs the full physics simulation (up to 2,000 steps at 60&nbsp;Hz). Returns SUCCESS/FAILURE, the total step count, and final positions and velocities of all objects. <b>Pre-simulation validation:</b> if the placement leaves the world, overlaps a ball or intersects a platform, the call returns an error stating the minimum adjustment needed instead of consuming a simulation.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 101)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; simulate_action({&#x27;x&#x27;: 1.8, &#x27;y&#x27;: 1.0, &#x27;radius&#x27;: 1.5})</span>
+SUCCESS! The green ball contacted the blue ball in the basket.
+Total simulation steps: 381
+Reward: 1.0
+
+Final object positions:
+  green_ball: pos=(3.152, -2.640), vel=(0.000, 0.000)
+  red_ball: pos=(1.183, -2.240), vel=(0.000, 0.000)
+  blue_ball: pos=(3.806, -2.782), vel=(0.000, 0.000)
+  ledge: pos=(3.500, -3.559), vel=(0.000, 0.000)
+  basket: pos=(3.645, -3.438), vel=(0.000, 0.000)
+  black_ball: pos=(-1.169, 4.600), vel=(0.000, 0.000)
+  black_platform: pos=(-1.820, -2.430), vel=(0.000, 0.000)
+  gray_ball: pos=(-4.246, -4.278), vel=(-0.022, 0.000)
+  gray_platform: pos=(0.197, -0.931), vel=(-0.100, -0.186)</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-simulate_partial">
+      <div class="tool-head"><code class="tool-sig">simulate_partial(x, y, radius, stop_step)</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">Same as <code>simulate_action</code>, but halts after <code>stop_step</code> physics steps (or earlier on success) and returns object positions and velocities at that checkpoint, for mid-simulation diagnostics.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>pass_the_parcel</code> seed 100)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; simulate_partial({&#x27;x&#x27;: 0.17, &#x27;y&#x27;: 3.0, &#x27;radius&#x27;: 0.5, &#x27;stop_step&#x27;: 100})</span>
+Simulation state at step 100:
+
+  green_ball: pos=(0.172, -0.534), vel=(0.000, 0.000)
+  red_ball: pos=(0.179, 1.081), vel=(0.000, 0.000)
+  blue_ball: pos=(-1.008, -4.445), vel=(0.000, 0.000)
+  ramp: pos=(3.442, 2.054), vel=(0.000, 0.000)
+  top_basket: pos=(0.172, -0.627), vel=(0.000, 0.000)
+  bottom_basket: pos=(-1.009, -4.970), vel=(0.000, 0.000)
+  black_platform: pos=(2.308, -0.893), vel=(0.000, 0.000)</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-get_contact_log">
+      <div class="tool-head"><code class="tool-sig">get_contact_log()</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">Timestamped collision events from the most recent simulation, as (step, object&nbsp;A, object&nbsp;B) entries (capped at 20), or &ldquo;No contact events recorded&rdquo;. Call it after <code>simulate_action</code> or <code>simulate_partial</code>.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 102)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; get_contact_log()</span>
+Contact events:
+  {&#x27;time&#x27;: 0.0, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;green_ball&#x27;, &#x27;gray_platform&#x27;}), &#x27;objects&#x27;: (&#x27;gray_platform&#x27;, &#x27;green_ball&#x27;)}
+  {&#x27;time&#x27;: 0.0, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;gray_platform&#x27;, &#x27;gray_ball&#x27;}), &#x27;objects&#x27;: (&#x27;gray_platform&#x27;, &#x27;gray_ball&#x27;)}
+  {&#x27;time&#x27;: 0.0, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;gray_ball&#x27;, &#x27;black_platform&#x27;}), &#x27;objects&#x27;: (&#x27;black_platform&#x27;, &#x27;gray_ball&#x27;)}
+  {&#x27;time&#x27;: 0.0, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;basket&#x27;, &#x27;blue_ball&#x27;}), &#x27;objects&#x27;: (&#x27;basket&#x27;, &#x27;blue_ball&#x27;)}
+  {&#x27;time&#x27;: 0.11666666666666665, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;ledge&#x27;, &#x27;basket&#x27;}), &#x27;objects&#x27;: (&#x27;basket&#x27;, &#x27;ledge&#x27;)}
+  {&#x27;time&#x27;: 0.13333333333333333, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;basket&#x27;, &#x27;blue_ball&#x27;}), &#x27;objects&#x27;: (&#x27;basket&#x27;, &#x27;blue_ball&#x27;)}
+  {&#x27;time&#x27;: 0.3333333333333333, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;red_ball&#x27;, &#x27;gray_platform&#x27;}), &#x27;objects&#x27;: (&#x27;gray_platform&#x27;, &#x27;red_ball&#x27;)}
+  {&#x27;time&#x27;: 0.35, &#x27;event&#x27;: &#x27;end&#x27;, &#x27;pair&#x27;: frozenset({&#x27;red_ball&#x27;, &#x27;gray_platform&#x27;}), &#x27;objects&#x27;: (&#x27;gray_platform&#x27;, &#x27;red_ball&#x27;)}
+  {&#x27;time&#x27;: 0.4833333333333333, &#x27;event&#x27;: &#x27;begin&#x27;, &#x27;pair&#x27;: frozenset({&#x27;red_ball&#x27;, &#x27;gray_platform&#x27;}), &#x27;objects&#x27;: (&#x27;gray_platform&#x27;, &#x27;red_ball&#x27;)}
+&hellip; (12 more lines)</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-finish">
+      <div class="tool-head"><code class="tool-sig">finish(x, y, radius)</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">Submits the final answer: places the red ball at (<i>x, y, r</i>) and ends the episode. The episode is a success if the physics engine confirms the goal condition.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 101)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; finish({&#x27;x&#x27;: 1.8, &#x27;y&#x27;: 1.0, &#x27;radius&#x27;: 1.5})</span>
+SUCCESS! The green ball contacted the blue ball in the basket.
+Total simulation steps: 381
+Reward: 1.0
+
+Final object positions:
+  green_ball: pos=(3.152, -2.640), vel=(0.000, 0.000)
+  red_ball: pos=(1.183, -2.240), vel=(0.000, 0.000)
+  blue_ball: pos=(3.806, -2.782), vel=(0.000, 0.000)
+  ledge: pos=(3.500, -3.559), vel=(0.000, 0.000)
+  basket: pos=(3.645, -3.438), vel=(0.000, 0.000)
+  black_ball: pos=(-1.169, 4.600), vel=(0.000, 0.000)
+  black_platform: pos=(-1.820, -2.430), vel=(0.000, 0.000)
+  gray_ball: pos=(-4.246, -4.278), vel=(-0.022, 0.000)
+  gray_platform: pos=(0.197, -0.931), vel=(-0.100, -0.186)</code></pre>
+      </details>
+    </div>
+    </div>
+  </section>
+
+  <section class="section" id="levels">
+    <div class="container container--narrow">
+      <h2 class="section-title">Level-specific tools</h2>
+
+      <div class="tool-level" id="lv-catapult">
+        <div class="tool-level-head">
+          <img src="assets/catapult_25_action.gif" alt="catapult level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>catapult</code> <span class="tier-tag tier-tag--hard">Tier 2 · hard</span></h3>
+            <p>A green ball rests on a pivoting arm; it must reach the blue ball in a basket on a far ledge, past a ceiling blocker.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-describe_scene_geometry">
+      <div class="tool-head"><code class="tool-sig">describe_scene_geometry()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Strategy-neutral geometric inventory with no prescriptive advice: all balls (position, radius, dynamic), all bars (centre, angle, length, dynamic) and baskets, plus the key green&ndash;blue distance and the success condition. A first-pass survey before committing to a strategy.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 101)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; describe_scene_geometry()</span>
+=== Scene Geometry ===
+World bounds: x ∈ [-5, 5], y ∈ [-5, 5]
+
+Balls:
+  green_ball: pos=(-3.15, -0.53), r=0.20, dynamic=True
+  blue_ball: pos=(3.50, -2.69), r=0.47, dynamic=True
+  black_ball: pos=(-1.17, 4.60), r=0.40, dynamic=False
+  gray_ball: pos=(-1.22, -1.63), r=0.70, dynamic=True
+
+Bars:
+  ledge: pos=(3.50, -3.56), angle=1.8°, len=3.00, dynamic=False
+  black_platform: pos=(-1.82, -2.43), angle=0.0°, len=3.00, dynamic=False
+  gray_platform: pos=(-1.22, -0.83), angle=0.0°, len=4.25, dynamic=True
+
+Baskets:
+  basket: pos=(3.50, -3.36), dynamic=True
+
+Key distances:
+  green↔blue: 6.99
+
+Success condition: green_ball ↔ blue_ball for 3.0s
+==================================================</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-predict_first_contact">
+      <div class="tool-head"><code class="tool-sig">predict_first_contact(x, y, radius)</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">A cheap pre-check (&le; 90 steps, about 1.5&nbsp;s of simulated time): placement validity, the first object the red ball hits, the contact step, approach speed, contact point and surface normal. Confirms the red ball reaches the catapult arm before a full simulation.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 101)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; predict_first_contact({&#x27;x&#x27;: 0.28, &#x27;y&#x27;: 1.0, &#x27;radius&#x27;: 1.5})</span>
+=== Predicted First Contact ===
+placement_valid: True
+red_ball drop: x=0.280, y=1.000, radius=1.500
+first_contact_object: gray_platform
+contact_step: 12
+approach_speed: 1.700
+contact_point (approx midpoint): (-0.471, -0.016)
+contact_normal (red-&gt;other inverted): (0.681, 0.732)</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-trace_green_ball">
+      <div class="tool-head"><code class="tool-sig">trace_green_ball(x, y, radius)</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">A lighter probe that samples only the green ball: its (<i>x, y</i>) waypoints every 30 steps (up to 600 steps) with a start / end / peak summary. Stops early once the ball settles or the level is solved. Answers &ldquo;where does the green ball go?&rdquo;</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 101)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; trace_green_ball({&#x27;x&#x27;: 0.28, &#x27;y&#x27;: 1.0, &#x27;radius&#x27;: 1.5})</span>
+=== Green Ball Trajectory (steps run: 240) ===
+red_ball drop: x=0.280, y=1.000, radius=1.500
+Success: False
+green_ball: start=(-3.15, -0.53) end=(-1.55, -2.13) Δ=(+1.59, -1.59) peak_y=+3.60 v_max=10.46
+
+Waypoints (step: x, y):
+  step    1: (-3.15, -0.53)
+  step   30: (-2.64, +1.45)
+  step   60: (-1.39, +3.60)
+  step   90: (-1.24, +0.59)
+  step  120: (-1.19, -1.88)
+  step  150: (-1.28, -2.13)
+  step  180: (-1.37, -2.13)
+  step  210: (-1.46, -2.13)
+  step  240: (-1.55, -2.13)</code></pre>
+      </details>
+    </div>
+    <div class="tool-card" id="tool-simulate_with_trace">
+      <div class="tool-head"><code class="tool-sig">simulate_with_trace(x, y, radius, object_names, stop_step)</code><span class="tool-kind tool-kind--sim">Simulation</span></div>
+      <p class="tool-desc">Runs a full or truncated simulation and returns per-object kinematic extrema for every name in <code>object_names</code>: peak and minimum height, peak speed, net displacement and, for rotating bodies, peak angular speed and angle range; plus up to 15 contact events involving the red ball or traced objects. Used to verify lever mechanics and that the green ball reaches the basket.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>catapult</code> seed 34)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; simulate_with_trace({&#x27;x&#x27;: 0.5, &#x27;y&#x27;: 0.4, &#x27;radius&#x27;: 1.5, &#x27;object_names&#x27;: [&#x27;green_ball&#x27;, &#x27;blue_ball&#x27;]})</span>
+=== Simulation Result (steps: 2000) ===
+Success: False
+
+Contacts (red_ball + traced objects):
+  step~  0: gray_platform ↔ green_ball
+  step~  0: basket ↔ blue_ball
+  step~  8: basket ↔ blue_ball
+  step~ 20: gray_platform ↔ red_ball
+  step~ 45: basket ↔ red_ball
+  step~ 48: basket ↔ red_ball
+  step~ 54: basket ↔ blue_ball
+  step~ 61: ledge ↔ red_ball
+  step~ 65: top_wall ↔ green_ball
+  step~ 71: ledge ↔ red_ball
+  step~ 71: gray_platform ↔ red_ball
+  step~ 76: basket ↔ blue_ball
+  step~ 83: basket ↔ blue_ball
+  step~ 85: ledge ↔ red_ball
+  step~ 88: basket ↔ blue_ball
+  ... +15 more
+
+Object summary (key kinematic extrema):
+  green_ball: y_peak=4.77, y_min=-3.02, v_max=12.47, Δpos=(+5.34, -1.40)
+    ω_peak=17.55 rad/s, θ∈[-0.7°, +1403.5°]
+  blue_ball: y_peak=-2.30, y_min=-2.54, v_max=2.66, Δpos=(+0.29, -0.08)
+    ω_peak=2.79 rad/s, θ∈[-9.5°, +37.9°]</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-pass_the_parcel">
+        <div class="tool-level-head">
+          <img src="assets/pass_the_parcel_44_action.gif" alt="pass_the_parcel level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>pass_the_parcel</code> <span class="tier-tag tier-tag--hard">Tier 2 · hard</span></h3>
+            <p>A green ball is trapped under an inverted basket; it must reach the blue ball in a basket below the platform.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-get_ramp_center">
+      <div class="tool-head"><code class="tool-sig">get_ramp_center()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Centre (<i>x, y</i>) of the ramp, with inferred geometry: top- and bottom-basket positions, platform position, ramp angle and ramp bounds. Guides rolling the red ball onto the ramp to drive the downstream mechanism.</p>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>pass_the_parcel</code> seed 100)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; get_ramp_center()</span>
+=== Pass The Parcel Analysis ===
+Ramp center: (3.442, 2.054)</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-down_to_earth">
+        <div class="tool-level-head">
+          <img src="assets/down_to_earth_47_action.gif" alt="down_to_earth level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>down_to_earth</code> <span class="tier-tag">Tier 1</span></h3>
+            <p>Gravity-driven drop past an obstruction.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-compute_gap_analysis">
+      <div class="tool-head"><code class="tool-sig">compute_gap_analysis()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Analyses the gaps on each side of the platform separating the green ball from the floor.</p>
+      <ul class="tool-returns"><li>platform span (left and right <i>x</i> of its edges)</li><li>green ball diameter</li><li>left gap (wall &rarr; platform) and right gap (platform &rarr; wall) widths</li><li>YES/NO: can the green ball fit through each gap</li><li>which side has the larger viable gap, or a WARNING if neither is wide enough</li></ul>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>down_to_earth</code> seed 87)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; compute_gap_analysis()</span>
+=== Gap Analysis ===
+Platform spans: x in [-0.6314, 3.7931]
+Green ball diameter: 1.0000
+
+Left gap (left wall to platform left edge): 4.3686
+  Green ball can fall left: YES (gap &gt; diameter)
+
+Right gap (platform right edge to right wall): 1.2069
+  Green ball can fall right: YES (gap &gt; diameter)
+
+Recommendation: Push green ball LEFT (larger gap).</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-two_body_problem">
+        <div class="tool-level-head">
+          <img src="assets/two_body_problem_42_solution.gif" alt="two_body_problem level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>two_body_problem</code> <span class="tier-tag">Tier 1</span></h3>
+            <p>Coordinate two interacting bodies via momentum transfer.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-compute_relative_positions">
+      <div class="tool-head"><code class="tool-sig">compute_relative_positions()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Analyses the spatial relationship between the green and blue balls, to guide pushing the green ball into the blue one.</p>
+      <ul class="tool-returns"><li>position and radius of each ball</li><li>&Delta;x, &Delta;y and centre-to-centre distance</li><li>minimum contact distance (sum of radii)</li><li>direction of the blue ball from the green ball (LEFT/RIGHT)</li></ul>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(logged agent call, <code>two_body_problem</code> seed 102)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; compute_relative_positions()</span>
+=== Relative Positions ===
+Green ball: (0.5578, -0.8684), radius=0.3480
+Blue ball:  (2.8625, -0.7407), radius=0.4758
+
+Horizontal separation (dx): 2.3047
+Vertical separation (dy): 0.1278
+Center-to-center distance: 2.3083
+Min contact distance (sum of radii): 0.8238
+
+Blue is to the RIGHT of Green.
+Push the Green Ball to the RIGHT.
+
+Placement feasibility (red must not overlap either ball at t=0):
+  centre must be &gt;= 0.3480 + r_red from Green (0.5578, -0.8684)
+  centre must be &gt;= 0.4758 + r_red from Blue  (2.8625, -0.7407)
+  worked example at r_red=0.6: &gt;= 0.9480 from Green, &gt;= 1.0758 from Blue</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-falling_into_place">
+        <div class="tool-level-head">
+          <img src="assets/falling_into_place_30_solution.gif" alt="falling_into_place level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>falling_into_place</code> <span class="tier-tag">Tier 1</span></h3>
+            <p>Timed interception: cross a platform edge to meet a falling jar.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-compute_intercept_setup">
+      <div class="tool-head"><code class="tool-sig">compute_intercept_setup()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Intercept geometry for the timed-interception puzzle.</p>
+      <ul class="tool-returns"><li>green ball position and which platform it rests on (LEFT/RIGHT)</li><li>blue jar position and the direction the green ball must travel</li><li>the platform edge to cross and the gap-centre <i>x</i></li><li>estimated time until the jar falls to platform height (seconds and 60&nbsp;Hz steps)</li></ul>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(called directly on <code>falling_into_place</code>, seed 57)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; compute_intercept_setup()</span>
+=== Intercept Setup ===
+Green ball: pos=(2.5119, 0.6525), on RIGHT platform
+Blue jar: pos=(0.0000, 4.3000)
+
+Green must travel: LEFT (toward jar x=0.0000)
+Nearest platform edge to cross: x=0.9862
+Gap center: x=-0.0138
+
+Jar fall time to platform height: ~0.92s (55 steps at 60Hz)</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-tipping_point">
+        <div class="tool-level-head">
+          <img src="assets/tipping_point_42_solution.gif" alt="tipping_point level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>tipping_point</code> <span class="tier-tag">Tier 1</span></h3>
+            <p>Unstable equilibrium &mdash; nudge a balanced structure the right way.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-compute_tipping_point_analysis">
+      <div class="tool-head"><code class="tool-sig">compute_tipping_point_analysis()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Geometry of a vertical green bar pinned at its base by a small gray basket, with a static purple wall on one side.</p>
+      <ul class="tool-returns"><li>bar centre, length, thickness, angle, and its free top and pinned bottom ends</li><li>gray basket centre</li><li>purple wall <i>x</i> and its vertical extent</li><li>wall side relative to the bar (LEFT/RIGHT) and horizontal distance to it</li><li>approximate tip angle to reach the wall, arcsin(&Delta;x / L)</li><li>suggested tip direction</li></ul>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(called directly on <code>tipping_point</code>, seed 57)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; compute_tipping_point_analysis()</span>
+=== Tipping Point Geometry Analysis ===
+Green bar: center=(2.1743, -2.7237), length=4.0525, thickness=0.2000, angle=90.0°
+  Top point (FREE end): (2.1743, -0.6975)
+  Bottom point (PINNED in basket): (2.1743, -4.7500)
+Gray basket: center=(2.1807, -4.9000) (holds the bar&#x27;s base)
+Purple wall: x=4.9000, top=5.0000, bottom=-5.0000 (static)
+
+Wall side relative to green bar: RIGHT
+Horizontal distance (bar centre → wall): 2.7257
+Approx angle bar must tip (pivoting at base) to reach wall: 42.27°</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-basket_case">
+        <div class="tool-level-head">
+          <img src="assets/basket_case_78_solution.gif" alt="basket_case level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>basket_case</code> <span class="tier-tag">Tier 1</span></h3>
+            <p>Container avoidance: deflect the green ball away from a basket.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-compute_basket_analysis">
+      <div class="tool-head"><code class="tool-sig">compute_basket_analysis()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Spatial relationship between the green ball and the basket it must avoid.</p>
+      <ul class="tool-returns"><li>green ball position and radius</li><li>basket position, scale and opening half-width</li><li>purple ground position (if present)</li><li>horizontal distance from the green ball to the basket centre</li><li>recommended push direction (LEFT/RIGHT) to deflect the ball away from the basket</li></ul>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(called directly on <code>basket_case</code>, seed 57)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; compute_basket_analysis()</span>
+=== Basket Analysis ===
+Green ball: pos=(-0.2218, 2.6806), radius=0.5000
+Basket: pos=(-0.2218, -3.1175), scale=1.6052083789444271
+Purple ground: y=-4.9000
+
+Green ball is 0.0000 units LEFT of basket center.
+Basket opening half-width ~ 1.61 units.</code></pre>
+      </details>
+    </div>
+      </div>
+
+      <div class="tool-level" id="lv-cliffhanger">
+        <div class="tool-level-head">
+          <img src="assets/cliffhanger_42_solution.gif" alt="cliffhanger level being solved" loading="lazy" />
+          <div>
+            <h3 class="subhead"><code>cliffhanger</code> <span class="tier-tag">Tier 1</span></h3>
+            <p>Ledge/edge dynamics under gravity.</p>
+          </div>
+        </div>
+    <div class="tool-card" id="tool-compute_cliffhanger_analysis">
+      <div class="tool-head"><code class="tool-sig">compute_cliffhanger_analysis()</code><span class="tool-kind tool-kind--state">State information</span></div>
+      <p class="tool-desc">Geometry of a vertical green bar standing on a black platform, with a ceiling above and the purple ground below.</p>
+      <ul class="tool-returns"><li>bar centre, length, thickness, angle, and its bottom and top points</li><li>platform extents and top-surface height</li><li>ceiling and ground heights where present</li><li>distance from the bar's base to each platform edge</li><li>the closer edge the bar must fall past, and the width of the falling gap on that side</li><li>the tip direction the bar's top must rotate for its centre of mass to cross that edge</li></ul>
+      <details class="tool-ex"><summary>Example output <span class="tool-ex-src">(called directly on <code>cliffhanger</code>, seed 57)</span></summary>
+<pre><code><span class="api-fn">&gt;&gt;&gt; compute_cliffhanger_analysis()</span>
+=== Cliffhanger Geometry Analysis ===
+Green bar: center=(2.4691, 0.7939), length=2.3403, thickness=0.2000, angle=90.0°
+  Bottom point (resting on platform): (2.4691, -0.3763)
+  Top point (opposite end): (2.4691, 1.9640)
+
+Black platform `black_platform`: x ∈ [-2.7992, 2.5691], y=-0.4763, top surface y=-0.3763, thickness=0.2000
+Ceiling: y=3.9640
+Purple ground: y=-4.9000
+
+Bar&#x27;s bottom-point distance to platform LEFT edge:  5.2683
+Bar&#x27;s bottom-point distance to platform RIGHT edge: 0.1000
+Closer platform edge: RIGHT (x = 2.5691)
+Falling gap on the RIGHT side (between platform edge and world wall): 2.4309 units wide
+
+To tip the bar off the platform, it must fall past the RIGHT edge — i.e. its top end must rotate RIGHT until the bar&#x27;s centre of mass crosses the RIGHT edge.</code></pre>
+      </details>
+    </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p><a href="index.html">&larr; Back to the HExA project page</a></p>
+    </div>
+  </footer>
+</body>
+</html>

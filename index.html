@@ -31,6 +31,7 @@
       <div class="nav-links">
         <a href="#abstract">Abstract</a>
         <a href="#interphyre">InterPhyre</a>
+        <a href="tools.html">Tools</a>
         <a href="#method">Method</a>
         <a href="#showcase">Gallery</a>
         <a href="#experiments">Results</a>
@@ -381,38 +382,18 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
         </div>
       </div>
 
-      <!-- ---- TOOL / INTERVENTION API ---- -->
-      <h3 class="subhead">The tool-call interface HExA uses</h3>
+      <!-- ---- TOOL INTERFACE (full reference on tools.html) ---- -->
+      <h3 class="subhead">The tool-call interface</h3>
       <p class="container--narrow">
-        Each level exposes a structured tool surface the agent invokes directly, so that hypothesis testing is
-        explicit and measurable. The <em>catapult</em> level, for example, exposes four complementary tools:
+        Agents interact with InterPhyre only through tools. <strong>State information</strong> tools query the scene
+        without advancing time; <strong>simulation</strong> tools place the red ball at <code>(x, y, r)</code> and run the
+        physics. Five shared tools are available on every level (<code>get_level_state</code>, <code>simulate_action</code>,
+        <code>simulate_partial</code>, <code>get_contact_log</code>, <code>finish</code>), and each level adds its own analysis
+        tools, such as <code>compute_gap_analysis</code> on down_to_earth or four lever-mechanics probes on catapult. ReAct,
+        HExA and all memory baselines use exactly the same interface.
       </p>
-      <div class="api-block container--narrow">
-<pre><code><span class="api-fn">describe_scene_geometry()</span>
-    <span class="api-cm"># Strategy-neutral inventory: balls (pos, radius, dynamic),</span>
-    <span class="api-cm"># bars (centre, angle, length), baskets, key pairwise distances,</span>
-    <span class="api-cm"># and the success condition. A first-pass survey.</span>
-
-<span class="api-fn">predict_first_contact(x, y, radius)</span>
-    <span class="api-cm"># Cheap pre-check (≤90 steps): which object the red ball hits</span>
-    <span class="api-cm"># first, the contact step, approach speed, point, surface normal.</span>
-
-<span class="api-fn">trace_green_ball(x, y, radius)</span>
-    <span class="api-cm"># Lightweight probe: green ball's (x,y) waypoints every 30 steps</span>
-    <span class="api-cm"># plus start/end/peak summary. "Where does it go?"</span>
-
-<span class="api-fn">simulate_with_trace(x, y, radius, object_names, stop_step)</span>
-    <span class="api-cm"># Full rollout: per-object kinematic extrema (peak_y, v_max,</span>
-    <span class="api-cm"># Δpos, angular speed) + up to 15 contact events.</span>
-
-<span class="api-fn">finish(x, y, radius)</span>
-    <span class="api-cm"># Commit the final placement; environment scores the predicate.</span></code></pre>
-      </div>
-      <p class="note container--narrow">
-        Other levels add bespoke analysis tools &mdash; <code>compute_intercept_setup()</code> (falling_into_place),
-        <code>compute_basket_analysis()</code> (basket_case), <code>get_ramp_center()</code> (pass_the_parcel).
-        The same backend exposes a <strong>snapshot/restore</strong> primitive that branches a shared
-        mid-trajectory state into paired counterfactual rollouts (shown above).
+      <p class="tool-link-row">
+        <a class="link-button" href="tools.html"><span>All tools for every level, with example outputs &rarr;</span></a>
       </p>
     </div>
   </section>

@@ -959,3 +959,24 @@ code {
 .gif-fig { margin: 22px auto 30px; max-width: 900px; }
 .gif-fig img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 6px; }
 .gif-fig figcaption { font-size: 13.5px; color: var(--text-soft); line-height: 1.55; margin-top: 8px; }
+
+/* ---- Tool reference page ---- */
+h1.section-title { font-size: 2rem; }
+.tool-card { border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; margin: 16px 0; background: var(--bg); }
+.tool-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.tool-sig { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); background: none; padding: 0; }
+.tool-kind { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.tool-kind--state { background: #e3f4f1; color: #0f6b5e; }
+.tool-kind--sim { background: #fdeee2; color: #9a4a0b; }
+.tool-desc { font-size: 14.5px; line-height: 1.6; color: var(--text-soft); margin: 10px 0 6px; }
+.tool-returns { font-size: 14px; color: var(--text-soft); line-height: 1.55; margin: 6px 0 8px 18px; padding: 0; }
+.tool-ex { margin-top: 8px; }
+.tool-ex summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--link); }
+.tool-ex-src { font-weight: 400; color: var(--text-muted); }
+.tool-ex pre { background: var(--bg-code); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; margin: 8px 0 0; }
+.tool-level { margin: 34px 0 10px; padding-top: 8px; border-top: 1px solid var(--rule); }
+.tool-level-head { display: grid; grid-template-columns: 160px 1fr; gap: 18px; align-items: center; }
+.tool-level-head img { width: 160px; border-radius: 6px; border: 1px solid var(--rule); }
+.tool-level-head p { margin: 4px 0 0; font-size: 14.5px; color: var(--text-soft); }
+@media (max-width: 560px) { .tool-level-head { grid-template-columns: 1fr; } .tool-level-head img { width: 100%; max-width: 280px; } }
+.tool-link-row { text-align: center; margin: 18px 0 4px; }
