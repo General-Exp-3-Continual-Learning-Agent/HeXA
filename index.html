@@ -96,7 +96,12 @@
   <section class="teaser">
     <div class="container">
       <figure>
-        <img src="assets/figures/hexa_final.png" alt="Overview of the HExA framework: (a) ReAct, (b) HExA meta-episodes with a skill bank, (c) skill transfer to unseen harder tasks" />
+        <div id="teaser-anim" class="teaser-anim" hidden></div>
+        <img id="teaser-static" src="assets/figures/hexa_final.png" alt="Overview of the HExA framework: (a) ReAct, (b) HExA meta-episodes with a skill bank, (c) skill transfer to unseen harder tasks" />
+        <div id="teaser-controls" class="teaser-controls" hidden>
+          <button type="button" id="teaser-play" class="teaser-btn">Pause</button>
+          <button type="button" id="teaser-view" class="teaser-btn">Show static figure</button>
+        </div>
         <figcaption><strong>Figure 1.</strong> <strong>Overview of the HExA framework.</strong> <strong>(a) Baseline ReAct:</strong> each episode is solved independently with no cross-episode learning. Each episode consists of alternating tool calls for experimentation, terminating in success (&#10003;) or failure (&times;). <strong>(b) HExA:</strong> inner episodes are processed in successive rounds of meta-episodes. After some inner episode, an evolver distills the trajectory into a <em>Skill Bank</em> of reusable skills and recurring mistakes that condition subsequent episodes. Repeated interaction helps evolve and refine the task-specific Skill Bank. <strong>(c) Transfer to unseen tasks:</strong> each source task runs the HExA loop independently to build its Skill Bank. The resulting banks are synthesized by the evolver into a single generalizable Skill Bank for zero-shot transfer to harder target tasks, with no target trajectories used during bank construction.</figcaption>
       </figure>
     </div>
@@ -1318,5 +1323,6 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
     </div>
   </footer>
 
+  <script src="assets/hexa_teaser.js" defer></script>
 </body>
 </html>

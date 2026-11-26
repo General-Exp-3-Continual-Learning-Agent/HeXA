@@ -978,3 +978,41 @@ h1.section-title { font-size: 2rem; }
 .tag-used { display: inline-block; font-size: 11px; font-weight: 600; color: #0f6b5e; background: #e3f4f1; border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; }
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
 .reward-table td, .reward-table th { text-align: center; }
+
+/* ---- Animated teaser (Figure 1) ---- */
+.teaser-anim { width: 100%; }
+.tz-svg { display: block; width: 100%; height: auto; font-family: var(--serif); }
+.tz-svg text { fill: #222; }
+.tz-t12 { font-size: 12px; } .tz-t13 { font-size: 13px; } .tz-t14 { font-size: 14px; } .tz-t16 { font-size: 18px; }
+.tz-t14b { font-size: 14px; font-weight: 700; }
+.tz-red { fill: #d33 !important; }
+.tz-muted { fill: #666 !important; }
+.tz-mono { font-family: var(--serif); font-style: italic; }
+.tz-title { font-size: 15px; font-weight: 700; }
+.tz-status { font-size: 13.5px; font-family: var(--sans); fill: #3273dc !important; }
+.tz-arrow { stroke: #222; stroke-width: 1.4; }
+.tz-arrow-thin { stroke-width: 1.1; }
+.tz-cell { opacity: 0.12; transition: opacity .25s ease, transform .25s ease; }
+.tz-cell.on { opacity: 1; }
+.tz-legend .tz-cell { opacity: 1; }
+.tz-legend .tz-chip { display: none; }
+.tz-chip { opacity: 0; transition: opacity .3s ease; }
+.tz-chip.on { opacity: 1; }
+.tz-skill { fill: #fff; stroke: #b9b2e3; stroke-dasharray: 3 2; transition: fill .35s ease, stroke .35s ease; }
+.tz-skill.on { fill: #f7b8cf; stroke: #d6457f; stroke-dasharray: none; }
+.tz-kb > rect:first-child { transition: stroke-width .3s ease; }
+.tz-kb.on > rect:first-child { stroke-width: 4; }
+.tz-cbank, .tz-synth, .tz-bsyn { opacity: .25; transition: opacity .35s ease; }
+.tz-cbank.on, .tz-synth.on, .tz-bsyn.on { opacity: 1; }
+.tz-dim { opacity: .35; transition: opacity .4s ease; }
+.tz-form rect { fill: #f7f7f7; stroke: #e2e2e2; stroke-width: 1.2; transition: fill .3s ease, stroke .3s ease; }
+.tz-form { opacity: .55; transition: opacity .3s ease; }
+.tz-form.on { opacity: 1; }
+.tz-form.on rect { fill: #eaf1fd; stroke: #3273dc; stroke-width: 2; }
+.teaser-controls { display: flex; justify-content: center; gap: 10px; margin: 10px 0 4px; }
+.teaser-controls[hidden], .teaser-anim[hidden], #teaser-static[hidden] { display: none; }
+.teaser-btn { font: 500 13px var(--sans); color: var(--text-soft); background: #fff; border: 1px solid var(--rule); border-radius: 999px; padding: 5px 14px; cursor: pointer; }
+.teaser-btn:hover { color: var(--link); border-color: var(--link); }
+.tz-sub { font-size: 72%; }
+.tz-t15 { font-size: 15px; }
+.tz-nochip { display: none; }
