@@ -934,6 +934,18 @@ code {
 .gif-fig img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 6px; }
 .gif-fig figcaption { font-size: 13.5px; color: var(--text-soft); line-height: 1.55; margin-top: 8px; }
 
+/* ---- LIBERO-PRO rollouts (Pigey vs Pigey + HExA) ---- */
+.rollout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 28px; max-width: 900px; margin: 12px auto 10px; }
+.rollout-fig { margin: 0; }
+.rollout-head { font-size: 13.5px; color: var(--text-soft); line-height: 1.45; margin-top: 8px; }
+.rollout-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rollout-cell { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rollout-cell video { display: block; width: 100%; height: auto; aspect-ratio: 512 / 576; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg-code); }
+.rollout-tag { font-size: 12px; font-weight: 600; }
+.rollout-tag--fail { color: #b42318; }
+.rollout-tag--ok { color: #0f6b5e; }
+@media (max-width: 760px) { .rollout-grid { grid-template-columns: 1fr; } }
+
 /* ---- Tool reference page ---- */
 h1.section-title { font-size: 2rem; }
 .tool-card { border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; margin: 16px 0; background: var(--bg); }

@@ -748,6 +748,68 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
         <img src="assets/figures/pigey_libero.png" alt="LIBERO-PRO: HExA skill bank improves Pigey in all six suites" loading="lazy" />
         <figcaption><strong>Figure 8.</strong> <strong>HExA improves a robot-manipulation agent on all six LIBERO-PRO perturbation suites.</strong> Success rate on the Pigey agent, whose LLM orchestrator drives a frozen &pi;<sub>0.5</sub> policy, over tasks 0&ndash;9 on held-out initial states (250 episodes per bar, one built bank per suite). <em>&pi;<sub>0.5</sub></em> gives the task instruction directly to the policy with no orchestrator; <em>Pigey</em> adds the Claude Sonnet 5.5 orchestrator; <em>HExA</em> is the same orchestrator with the frozen HExA skill bank injected. The bank adds +6.8 to +30.4 points over the same orchestrator without it, with the smallest gain on the suite where the no-bank agent already succeeds most often (spatial task).</figcaption>
       </figure>
+
+      <!-- LIBERO-PRO rollouts: Pigey vs Pigey + HExA, one held-out episode per suite -->
+      <p class="gal-note">One held-out episode per suite on which &pi;<sub>0.5</sub> alone and Pigey both fail and
+      Pigey + HExA succeeds. Both agents use the same orchestrator (Claude Sonnet 5.5), policy and initial state; the
+      only difference is the injected skill bank. Each clip steps through the agentview snapshot taken after every tool
+      call (boxes are the agent's object detections); the last frame shows the simulator's verdict.</p>
+      <div class="rollout-grid">
+        <figure class="rollout-fig">
+          <div class="rollout-pair">
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--fail">Pigey &middot; fail</span>
+              <video src="assets/showcase/libero/goal_task_pigey.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey fails to put the plate on the stove"></video></div>
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--ok">Pigey + HExA &middot; success</span>
+              <video src="assets/showcase/libero/goal_task_hexa.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey with HExA puts the plate on the stove"></video></div>
+          </div>
+          <figcaption class="rollout-head"><strong>Goal task</strong>: &ldquo;Put the plate on the stove&rdquo; (task 1, init state 26)</figcaption>
+        </figure>
+        <figure class="rollout-fig">
+          <div class="rollout-pair">
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--fail">Pigey &middot; fail</span>
+              <video src="assets/showcase/libero/goal_swap_pigey.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey fails to put the bowl on top of the cabinet"></video></div>
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--ok">Pigey + HExA &middot; success</span>
+              <video src="assets/showcase/libero/goal_swap_hexa.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey with HExA puts the bowl on top of the cabinet"></video></div>
+          </div>
+          <figcaption class="rollout-head"><strong>Goal swap</strong>: &ldquo;put the bowl on top of the cabinet&rdquo; (task 4, init state 41)</figcaption>
+        </figure>
+        <figure class="rollout-fig">
+          <div class="rollout-pair">
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--fail">Pigey &middot; fail</span>
+              <video src="assets/showcase/libero/object_task_pigey.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey fails to place the butter in the basket"></video></div>
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--ok">Pigey + HExA &middot; success</span>
+              <video src="assets/showcase/libero/object_task_hexa.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey with HExA places the butter in the basket"></video></div>
+          </div>
+          <figcaption class="rollout-head"><strong>Object task</strong>: &ldquo;Pick the butter and place it in the basket&rdquo; (task 7, init state 25)</figcaption>
+        </figure>
+        <figure class="rollout-fig">
+          <div class="rollout-pair">
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--fail">Pigey &middot; fail</span>
+              <video src="assets/showcase/libero/object_swap_pigey.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey fails to place the tomato sauce in the basket"></video></div>
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--ok">Pigey + HExA &middot; success</span>
+              <video src="assets/showcase/libero/object_swap_hexa.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey with HExA places the tomato sauce in the basket"></video></div>
+          </div>
+          <figcaption class="rollout-head"><strong>Object swap</strong>: &ldquo;pick up the tomato sauce and place it in the basket&rdquo; (task 5, init state 35)</figcaption>
+        </figure>
+        <figure class="rollout-fig">
+          <div class="rollout-pair">
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--fail">Pigey &middot; fail</span>
+              <video src="assets/showcase/libero/spatial_task_pigey.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey fails to place the bowl on the plate"></video></div>
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--ok">Pigey + HExA &middot; success</span>
+              <video src="assets/showcase/libero/spatial_task_hexa.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey with HExA places the bowl on the plate"></video></div>
+          </div>
+          <figcaption class="rollout-head"><strong>Spatial task</strong>: &ldquo;Pick the akita black bowl next to the plate and place it on the plate&rdquo; (task 2, init state 28)</figcaption>
+        </figure>
+        <figure class="rollout-fig">
+          <div class="rollout-pair">
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--fail">Pigey &middot; fail</span>
+              <video src="assets/showcase/libero/spatial_swap_pigey.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey fails to place the bowl from the drawer on the plate"></video></div>
+            <div class="rollout-cell"><span class="rollout-tag rollout-tag--ok">Pigey + HExA &middot; success</span>
+              <video src="assets/showcase/libero/spatial_swap_hexa.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pigey with HExA places the bowl from the drawer on the plate"></video></div>
+          </div>
+          <figcaption class="rollout-head"><strong>Spatial swap</strong>: &ldquo;pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate&rdquo; (task 4, init state 45)</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
