@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HExA Method Details</title>
+  <meta name="description" content="Full methodological details of HExA: objective, the actor-evolver-retriever loop, trajectory reward, two-phase skill distillation, the bounded skill bank, initialization and update regimes, cross-task skill synthesis, inference modes and training budgets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Google+Sans:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="nav-brand" href="index.html">HExA</a>
+      <div class="nav-links">
+        <a href="index.html#method">&larr; Back to main page</a>
+        <a href="#objective">Objective</a>
+        <a href="#loop">Loop</a>
+        <a href="#reward">Reward</a>
+        <a href="#distillation">Distillation</a>
+        <a href="#bank">Skill bank</a>
+        <a href="#regimes">Regimes</a>
+        <a href="#transfer">Transfer</a>
+        <a href="#inference">Inference</a>
+        <a href="#budgets">Budgets</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================ -->
+  <section class="section" id="overview">
+    <div class="container container--narrow">
+      <h1 class="section-title">HExA Method Details</h1>
+      <p class="lead">
+        HExA (Hierarchical Experimentalist Agents) improves a <strong>frozen</strong> LLM agent through context alone. Three
+        components alternate over rounds: an <strong>actor</strong> \(\pi_{\mathrm{act}}\) that experiments in the environment
+        through tools, an <strong>evolver</strong> \(\pi_{\mathrm{ev}}\) that distils the resulting trajectories into a bounded
+        <strong>skill bank</strong> \(\mathcal{K}\), and a <strong>retriever</strong> that injects the best skills and mistakes into
+        the actor's next episodes. No model weights change at any point; the evolving bank is the only learning state.
+      </p>
+      <figure class="chart-fig">
+        <img src="assets/Feedback_Loop.png" alt="The HExA actor-evolver loop" loading="lazy" />
+        <figcaption><strong>The HExA actor&ndash;evolver loop.</strong> The actor receives distilled skills in its system prompt
+        and produces reward-annotated trajectories; the evolver curates the bank (skills, max \(M\), are merged, pruned or
+        promoted by reward; common mistakes, max \(N\), are updated); the updated bank is injected back for the next round.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section section--alt" id="objective">
+    <div class="container container--narrow">
+      <h2 class="section-title">Problem Setup and Objective</h2>
+      <p>
+        A task family \(\ell\) has instances \((\ell, s_j)\), where each seed \(s_j\) fixes the geometry, parameters and initial
+        conditions. Each family has a set of <em>experimentation seeds</em> \(\mathcal{S}_\ell\), on which the agent experiments
+        and the bank is evolved, and a <em>disjoint</em> held-out set \(\mathcal{S}^{\mathrm{ev}}_\ell\) on which the resulting
+        bank is evaluated. The actor interacts through an environment-provided tool interface \(\mathcal{F}\)
+        (<a href="tools.html">all InterPhyre tools</a>) for at most \(T\) turns. At turn \(t\) it observes the history
+        \(h_t=(a_0,o_0,\ldots,a_{t-1},o_{t-1})\) and selects a tool call
+      </p>
+      $$a_t \sim \pi_{\mathrm{act}}\!\left(\cdot \mid \ell, s_j, \mathcal{G}, h_t; \mathcal{F}\right), \qquad o_t = \mathrm{Env}(a_t),$$
+      <p>
+        where \(\mathcal{G}\) is a skill context retrieved once at the start of the episode. The episode ends on a terminal
+        action, a successful simulation, or after \(T\) turns, and success is a binary check of the final simulator state:
+      </p>
+      $$y_j = \mathbb{I}\!\left[\mathrm{Goal}_\ell\big(\mathrm{Sim}(\tau_j)\big)\right], \qquad \tau_j \sim \pi_{\mathrm{act}}(\cdot \mid \ell, s_j, \mathcal{G}).$$
+      <p>
+        This definition is method-agnostic: skill-free baselines are simply the case \(\mathcal{G}=\emptyset\). For a fixed actor,
+        HExA evolves only the bank \(\mathcal{K}\) to maximise expected success on future instances,
+      </p>
+      $$J_\ell(\mathcal{K}) = \mathbb{E}_{s\sim\mathcal{D}_\ell}\!\left[\, y\big(\pi_{\mathrm{act}};\ \ell,\ \mathrm{Retriever}(\mathcal{K},\ell,M,N)\big)\right],
+        \qquad \Delta J_\ell^{\mathrm{HExA}} = J_\ell(\mathcal{K}_R) - J_\ell(\emptyset).$$
+      <p>
+        The bank \(\mathcal{K}_R\) is useful exactly when the <em>same frozen actor</em> does better with it than without it on
+        unseen instances.
+      </p>
+
+      <h3 class="subhead">HExA as online, non-parametric in-context RL</h3>
+      <p>
+        Unlike in-context RL methods that meta-train a sequence model on RL histories, HExA needs no meta-training: it builds an
+        explicit external state from the actor's own interaction. The bank induces an effective policy
+        \(\pi_{\mathcal{K}}(a_t\mid\ell,s,h_t) := \pi_{\mathrm{act}}(a_t\mid\ell,s,\mathcal{G}_{\mathcal{K},\ell},h_t)\) whose
+        parameters never change, but whose behaviour does as \(\mathcal{K}\) changes. Learning is <strong>online</strong>: data
+        is not drawn from a fixed corpus but generated by the policy the current bank induces, closing the loop
+        \(\mathcal{K}_{n-1}\rightarrow\pi_{\mathcal{K}_{n-1}}\rightarrow\mathcal{T}^{(n)}\rightarrow\mathcal{K}_n\).
+        The trajectory reward \(r(\tau)\) is only an internal credit-assignment signal for building the bank, distinct from the
+        task objective \(J_\ell\).
+      </p>
+      <h3 class="subhead">HExA as meta-learning through experimentation</h3>
+      <p>
+        The inner loop adapts actions within an episode through hypothesis-driven experiments; the outer loop distils those
+        experiments into the bank, which changes not only the actor's answers but <em>which experiments it runs next</em>.
+        HExA therefore learns how to experiment, extending meta-in-context learning to interactive decision making &mdash; a
+        non-parametric, history-conditioned form of meta-RL related to RL<sup>2</sup>, without meta-training or weight updates.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section" id="loop">
+    <div class="container container--narrow">
+      <h2 class="section-title">The HExA Loop</h2>
+      <p>
+        Experimentation seeds are processed in \(R=\lceil|\mathcal{S}_\ell|/x\rceil\) rounds of \(x\) episodes. At round \(n\) the
+        retriever builds \(\mathcal{G}_n\) from the previous bank, the actor plays a fresh batch of seeds under that same
+        \(\mathcal{G}_n\), and the evolver updates the bank from the new reward-tagged trajectories. Because
+        \(\mathcal{T}^{(n)}\) is generated under \(\mathcal{K}_{n-1}\), every bank update changes the policy that collects the
+        next round of experience. After the final round, \(\mathcal{K}_R\) is frozen.
+      </p>
+      <div class="algo">
+        <div class="algo-title">Algorithm 1 &nbsp;HExA (initialization and update variants)</div>
+<pre><span class="algo-kw">Input:</span> actor π_act, evolver π_ev, task family ℓ, initialization ∈ {empty, warm-start},
+       update ∈ {evolution, iterative replacement}, rounds R, episodes per round x, retrieval sizes M, N
+
+<span class="algo-cm"># Initialize the skill bank</span>
+<span class="algo-kw">if</span> warm-start:
+    collect skill-free batch T₀ of x trajectories from π_act
+    K₀ ← π_ev(∅, T₀)
+<span class="algo-kw">else</span>:
+    K₀ ← ∅
+
+<span class="algo-cm"># Main loop: collect experience, then update the bank</span>
+<span class="algo-kw">for</span> n = 1 … R:
+    G_n ← Retriever(K_{n−1}, ℓ, M, N)              <span class="algo-cm"># top-M skills + top-N mistakes</span>
+    <span class="algo-kw">for</span> i = 1 + x(n−1) … xn:
+        τ_i ← π_act(· | ℓ, s_i, G_n)                 <span class="algo-cm"># task + tools + skills</span>
+        r(τ_i) ← Reward(τ_i)                         <span class="algo-cm"># outcome × efficiency</span>
+    <span class="algo-kw">if</span> update = evolution:
+        K_n ← π_ev(K_{n−1}, T⁽ⁿ⁾)                    <span class="algo-cm"># keep old bank, add new evidence</span>
+    <span class="algo-kw">else</span>:
+        K_n ← π_ev(∅, T⁽ⁿ⁾)                          <span class="algo-cm"># rebuild from this round only</span>
+<span class="algo-kw">return</span> K_R</pre>
+      </div>
+      <p class="note">Unless stated otherwise, &ldquo;HExA&rdquo; in our experiments is the reward-guided
+      <strong>Off2On + Evolution</strong> variant (warm start, then evolution).</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section section--alt" id="reward">
+    <div class="container container--narrow">
+      <h2 class="section-title">Trajectory Reward</h2>
+      <p>
+        Trajectories differ not only in whether they solve the task but in how much experimental evidence they carry. Each
+        trajectory gets a scalar \(r(\tau)\in[-1,+1]\) combining <strong>outcome</strong> and <strong>interaction
+        efficiency</strong>. For InterPhyre, with \(t\) the number of turns used and \(T\) the budget:
+      </p>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr><th>Outcome</th><th>Turns used</th><th>\(r(\tau)\)</th></tr></thead>
+          <tbody>
+            <tr><td>Success</td><td>\(t \le 3\)</td><td>+1.00</td></tr>
+            <tr><td>Success</td><td>\(4 \le t \le 7\)</td><td>+0.75</td></tr>
+            <tr><td>Success</td><td>\(8 \le t \le 15\)</td><td>+0.50</td></tr>
+            <tr><td>Success</td><td>\(16 \le t \le T\)</td><td>+0.25</td></tr>
+            <tr><td>Failure</td><td>\(t \ge 10\)</td><td>&minus;0.50</td></tr>
+            <tr><td>Failure</td><td>\(t &lt; 10\)</td><td>&minus;0.75</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Faster successes earn more. Among failures, trajectories that kept experimenting are penalised less than ones that gave
+        up early, because they contain more evidence from which the evolver can recover partial skills or diagnose failure
+        modes. The values are <strong>discrete</strong> because the reward is read by an LLM evolver as evidence, not optimised by
+        gradient descent; the categories encode qualitatively different outcomes (fast success, slow success, extended
+        exploration, early failure) that are easy to contrast.
+      </p>
+      <p class="note">The reward is an instantiation, not a requirement: any scorer works (environment reward, human feedback, an
+      LLM judge, a learned reward model), and HExA can also run <strong>without reward labels</strong>, leaving trajectory
+      quality to the evolver (labels help; see the reward ablation on the main page).</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section" id="distillation">
+    <div class="container container--narrow">
+      <h2 class="section-title">Two-Phase Skill Distillation</h2>
+      <p>
+        After each round the evolver receives the current bank and the batch
+        \(\mathcal{T}^{(n)} = \mathcal{T}^{(n),+} \cup \mathcal{T}^{(n),-}\) of successful and failed trajectories, each with the
+        actor's reasoning, tool calls, observations and reward.
+      </p>
+      <div class="cap-grid cap-grid--2">
+        <div class="cap-card">
+          <div class="cap-h">Phase 1 &middot; Contrastive strategy extraction</div>
+          <p>Over the whole batch, contrast high-reward against low-reward trajectories to find which strategies, experimental
+          choices or mechanistic insights separate effective from ineffective behaviour, and summarise them as a few
+          <strong>strategy skills</strong>. Evidence is weighted by trajectory quality: principles backed by fast successes count
+          more than ones inferred from marginal successes or partial evidence.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-h">Phase 2 &middot; Mistakes and partial skills</div>
+          <p>On the failed subset, extract <strong>mistake records</strong> \(\mu=(\delta,\rho,\alpha)\): a recurring failure
+          \(\delta\), its root cause \(\rho\), and an actionable correction \(\alpha\). Also recover <strong>partial
+          skills</strong>: correct intermediate discoveries inside failed episodes (e.g. the right mechanism or a promising
+          parameter region), so a failure is not treated as uninformative.</p>
+        </div>
+      </div>
+      <p>
+        Because later rounds are generated while conditioned on earlier skills, new evidence can <strong>refine</strong> an earlier
+        principle, <strong>narrow</strong> where it applies, <strong>combine</strong> it with complementary discoveries, or
+        <strong>replace</strong> it when contradicted. We call this repeated refinement and composition <em>skill evolution</em>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section section--alt" id="bank">
+    <div class="container container--narrow">
+      <h2 class="section-title">The Skill Bank</h2>
+      <p>
+        The bank is indexed by task family and holds two collections: strategy skills \(\mathcal{K}^{\mathrm{sk}}\) and mistake
+        records \(\mathcal{K}^{\mathrm{mis}}\). Unlike episodic memory it stores <strong>no raw trajectories</strong>; it
+        compresses repeated experimental evidence into abstractions with explicit applicability conditions.
+      </p>
+
+      <h3 class="subhead">What an entry looks like</h3>
+      <p>A real strategy skill and mistake record from the frozen catapult bank used for held-out seed 64 in the paper:</p>
+      <div class="schema-grid">
+        <div class="schema-card">
+          <div class="schema-type">Strategy skill</div>
+          <dl>
+            <dt>title</dt><dd>Trace-then-Simulate: Gap Threshold, Bisect Chaotic Cliffs, Simulate Narrow Boundary</dd>
+            <dt>principle</dt><dd>At standard drop heights (y&le;0.0), commit to simulate when gap is under 0.8 units. At elevated
+            heights (y=0.25&ndash;0.5), commit at gap &lt;0.5. When a chaotic cliff is detected in y=0.3&ndash;0.5, bisect to the
+            midpoint rather than simulating immediately&hellip;</dd>
+            <dt>when to apply</dt><dd>At y&le;0.0: gap &lt;0.8 &rarr; simulate. At y=0.25&ndash;0.5: gap &lt;0.5 &rarr; simulate. If
+            chaotic cliff: bisect first&hellip;</dd>
+            <dt>example</dt><dd>Seed 51: gap ~0.21 at y=0.0 &rarr; success. Seed 52: cliff at y=0.34/0.35 after full bisection
+            &rarr; simulated y=0.34 (overshoot) &rarr; success via arc contact.</dd>
+            <dt>source seeds</dt><dd>49, 50, 51, 52</dd>
+            <dt>score \(r_k\)</dt><dd>0.87</dd>
+          </dl>
+        </div>
+        <div class="schema-card schema-card--mistake">
+          <div class="schema-type">Mistake record \((\delta, \rho, \alpha)\)</div>
+          <dl>
+            <dt>failure pattern \(\delta\)</dt><dd>Fine-tuning x or y in a chaotic zone when trajectory response is nonlinear.</dd>
+            <dt>root cause \(\rho\)</dt><dd>Agents assume monotonic response and keep incrementing when the system is actually
+            sensitive/chaotic.</dd>
+            <dt>correction \(\alpha\)</dt><dd>When two consecutive traces produce landing positions &gt;1.5 units apart with small
+            &Delta;, switch to bisection rather than linear search.</dd>
+          </dl>
+        </div>
+      </div>
+
+      <h3 class="subhead">Trajectory-grounded skill score</h3>
+      <p>Each skill's score comes from the mean reward \(\bar r_{\mathrm{src}}\) of the trajectories it was distilled from:</p>
+      $$r_k = \operatorname{clamp}\!\left(\frac{\bar r_{\mathrm{src}} + 1}{2},\ 0.1,\ 1.0\right).$$
+      <p>Skills backed by efficient successes score high; skills recovered from weaker or partial evidence can stay in the bank
+      with lower scores. The score drives both retrieval order and what is kept or pruned when the bank is full.</p>
+
+      <h3 class="subhead">Bounded bank, bounded context</h3>
+      <p>
+        Each task family holds at most \(M_{\max}\) skills and \(N_{\max}\) mistakes:
+        \(|\mathcal{K}^{\mathrm{sk}}|\le M_{\max}\), \(|\mathcal{K}^{\mathrm{mis}}|\le N_{\max}\). Experience can grow without
+        limit, but the representation the actor sees stays compact, which forces the evolver to consolidate, revise or drop
+        redundant entries as evidence accumulates.
+      </p>
+
+      <h3 class="subhead">Retrieval and prompt injection</h3>
+      <p>
+        At the start of an episode the retriever selects the top-\(M\) skills by \(r_k\) and the top-\(N\) mistakes for the task
+        family, \(\mathcal{G}=\mathrm{Retriever}(\mathcal{K},\ell,M,N)\), and adds them as a structured block to the actor's
+        system prompt, next to the unchanged task description and tool documentation. The actor need not follow a skill
+        verbatim: skills are reusable hypotheses, applicability conditions and failure warnings it can use or ignore. Only the
+        text context changes &mdash; not parameters, architecture, decoding or the environment &mdash; so the same mechanism works
+        for open-weight and API-only models.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section" id="regimes">
+    <div class="container container--narrow">
+      <h2 class="section-title">Initialization and Update Regimes</h2>
+      <p>The loop admits variants along two axes, which separate the benefit of warm-starting from that of cumulative
+      evolution.</p>
+      <div class="table-wrap">
+        <table class="results-table results-table--left">
+          <thead><tr><th>Initialization \(\mathcal{K}_0\)</th><th>Static</th><th>Evolution<br><span class="th-sub">\(\pi_{\mathrm{ev}}(\mathcal{K}_{n-1},\mathcal{T}^{(n)})\)</span></th><th>Iterative replacement<br><span class="th-sub">\(\pi_{\mathrm{ev}}(\emptyset,\mathcal{T}^{(n)})\)</span></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Offline</strong>: distil a skill-free warm-start batch \(\mathcal{T}_0\), then hold fixed</td><td>Offline Static</td><td>&ndash;</td><td>&ndash;</td></tr>
+            <tr class="row-highlight"><td><strong>Off2On</strong>: same warm start, then keep updating</td><td>&ndash;</td><td><strong>Off2On Evolution (HExA default)</strong></td><td>Off2On Iterative Replacement</td></tr>
+            <tr><td><strong>Online</strong>: start empty, \(\mathcal{K}_0=\emptyset\)</td><td>&ndash;</td><td>Online Evolution</td><td>Online Iterative Replacement</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <strong>Evolution</strong> gives the evolver the previous bank, so it can add skills, merge corroborating evidence, revise
+        applicability conditions, or remove contradicted entries. <strong>Iterative replacement</strong> rebuilds the bank from the
+        latest batch only; those trajectories still reflect earlier skills implicitly, but the bank itself is not passed on.
+        Evolution guards against <em>skill drift</em>, where rebuilding from a small recent batch discards broadly useful
+        principles in favour of strategies specific to the latest instances.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section section--alt" id="transfer">
+    <div class="container container--narrow">
+      <h2 class="section-title">Cross-Task Skill Synthesis</h2>
+      <p>
+        Mechanisms such as momentum transfer, contact geometry, lever mechanics and collision order, and procedural search
+        strategies, need not be tied to one task's coordinates or objects. Given evolved source banks
+        \(\mathcal{K}_{\ell_1},\ldots,\mathcal{K}_{\ell_S}\) and only a <em>textual description</em> of an unseen target
+        \(\ell^*\), a transfer evolver synthesises a target bank with <strong>no target-task trajectories</strong>:
+      </p>
+      $$\mathcal{K}_{\ell^*} = \pi^{\mathrm{tr}}_{\mathrm{ev}}\!\left(\{\mathcal{K}_{\ell_i}\}_{i=1}^{S},\ \mathrm{desc}(\ell^*)\right), \qquad \mathcal{T}_{\ell^*}=\emptyset.$$
+      <ol class="steps">
+        <li><strong>Select</strong> source skills whose physical or procedural mechanism is structurally relevant to the target.</li>
+        <li><strong>Remove source-specific bindings</strong>: coordinates, object identities and parameter values that do not transfer.</li>
+        <li><strong>Re-ground</strong> each retained principle in the target's entities, constraints and tools.</li>
+        <li><strong>Score</strong> each transferred skill by how direct the structural correspondence is and how many source
+        banks corroborate it. This transfer score replaces the reward-derived \(r_k\), is clamped to the same \([0.1, 1.0]\), and
+        is used by the same retriever.</li>
+      </ol>
+      <p>
+        The evolver is explicitly told <strong>not to invent target-specific coordinates or solutions</strong> unsupported by the
+        source banks and the description; transferred entries are general mechanisms with conditions for when they apply.
+        The synthesised bank can be used in two ways: injected directly for <strong>zero-shot transfer</strong>, or used as
+        \(\mathcal{K}_0\) for a subsequent within-task HExA run that refines it with target evidence.
+      </p>
+      <p>
+        <strong>Hierarchy.</strong> Skills are hierarchical in two operational senses: distillation abstracts many low-level
+        tool calls and parameter settings into one principle with applicability conditions, and later skills are learned while
+        the actor already uses earlier ones, so they refine, delimit, merge or replace them. The bank is not an explicit tree;
+        its hierarchy emerges from repeated abstraction and composition across rounds and tasks.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section" id="inference">
+    <div class="container container--narrow">
+      <h2 class="section-title">Inference with a Learned Bank</h2>
+      <p>
+        At evaluation the actor runs on the held-out seeds \(\mathcal{S}^{\mathrm{ev}}_\ell\) with the same \(T\)-turn budget as
+        during bank construction, using either the frozen within-task bank \(\mathcal{K}_R\) or a synthesised bank
+        \(\mathcal{K}_{\ell^*}\). Each seed starts from a fresh copy of the bank, and nothing carries over between evaluation seeds.
+      </p>
+      <div class="cap-grid cap-grid--2">
+        <div class="cap-card">
+          <div class="cap-h">Static skill injection <span class="tag-used">used for all reported results</span></div>
+          <p>The skill context is retrieved once at the start of the episode and kept fixed; the bank is never modified during or
+          between episodes, and the evolver is not called.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-h">Within-seed experimentation</div>
+          <p>After every turn the evolver refines a seed-local copy of the bank from the interaction so far,
+          \(\mathcal{K}_{j,t+1}=\pi_{\mathrm{ev}}(\mathcal{K}_{j,t},h_{t+1})\), so the agent can confirm, narrow or drop a skill as
+          soon as an experiment contradicts it. It uses no extra environment turns, and the copy is discarded at the end of the
+          episode.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="section section--alt" id="budgets">
+    <div class="container container--narrow">
+      <h2 class="section-title">Training and Evaluation Budgets</h2>
+      <p>
+        In every environment the training and evaluation instances are disjoint, memory baselines build their memory on the
+        same training instances as HExA, and every method is scored on the same held-out instances with a frozen bank or store.
+        <em>Warm start</em> is the number of instances played by the base actor with an empty bank and distilled into the
+        initial bank; <em>training</em> is rounds &times; instances per round.
+      </p>
+      <div class="table-wrap">
+        <table class="results-table results-table--left">
+          <thead><tr><th>Environment</th><th>Warm start</th><th>Training</th><th>Held-out eval</th></tr></thead>
+          <tbody>
+            <tr><td>InterPhyre (each level)</td><td>5</td><td>51 (17 &times; 3)</td><td>50</td></tr>
+            <tr><td>Mastermind</td><td>10</td><td>70 (7 &times; 10)</td><td>40</td></tr>
+            <tr><td>Maze (gpt-oss-120b)</td><td>10</td><td>190 (19 &times; 10)</td><td>243</td></tr>
+            <tr><td>Reasoning &amp; planning (each task)</td><td>2</td><td>58 (29 &times; 2, 10 attempts)</td><td>100</td></tr>
+            <tr><td>DiscoverPhysics <code>oscillator</code>, <code>circle</code></td><td>5</td><td>15 (5 &times; 3)</td><td>15</td></tr>
+            <tr><td colspan="4"><em>Transfer (no target-task trajectories)</em></td></tr>
+            <tr><td>InterPhyre cross-level</td><td colspan="2">source-level banks</td><td>50</td></tr>
+            <tr><td>Games cross-task</td><td colspan="2">Wordle 10 + 120, Minesweeper 10 + 190</td><td>40 / 243</td></tr>
+            <tr><td>DiscoverPhysics <code>hubble</code></td><td>18</td><td>24 (8 worlds &times; 3)</td><td>15</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="subhead">Design principles</h3>
+      <ul class="principles">
+        <li><strong>In-context, not parametric.</strong> Neither actor nor evolver is fine-tuned; adaptation lives in the external
+        bank, so HExA works with frozen and API-served models and avoids the cost and forgetting of repeated fine-tuning.</li>
+        <li><strong>Domain-independent.</strong> The only domain-specific inputs are the task description and the tools; the evolver
+        reads text trajectories and writes text skills, so the same loop applies wherever an agent can interact and observe.</li>
+        <li><strong>Reward-flexible.</strong> An informative reward helps credit assignment and prioritisation, but the bank can be
+        built and updated without reward labels.</li>
+        <li><strong>Hierarchical and compositional.</strong> Skills abstract low-level actions into principles, and later skills
+        build on earlier ones across rounds and tasks.</li>
+      </ul>
+      <p class="tool-link-row"><a class="link-button" href="index.html#method"><span>&larr; Back to the main page</span></a></p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p><a href="index.html">&larr; Back to the HExA project page</a> &middot; <a href="tools.html">InterPhyre tool reference</a></p>
+    </div>
+  </footer>
+</body>
+</html>

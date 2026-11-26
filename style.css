@@ -530,42 +530,6 @@ code {
 @media (max-width: 720px) { .chart-2col { grid-template-columns: 1fr; } }
 
 /* =================================================================
-   TRACE COMPARISON (episode walkthrough)
-   ================================================================= */
-
-.trace-compare { display: flex; flex-direction: column; gap: 16px; }
-.trace-row { margin: 0; }
-.trace-label { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
-.trace-media {
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 14px;
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-muted);
-  background: var(--bg-code);
-  border: 1px dashed var(--rule);
-}
-.trace-row img, .trace-row video { display: block; width: 100%; max-width: 440px; margin: 0 auto; border-radius: 6px; }
-.trace-row--fail .trace-media { border-color: #e0b4b4; }
-.trace-row--win .trace-media { border-color: #a7d3a7; }
-.badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 1px 8px;
-  border-radius: 999px;
-}
-.badge--fail { color: #a33; background: #fbeaea; }
-.badge--win { color: #2c7a2c; background: #e9f6e9; }
-
-/* =================================================================
    CLAIM CARDS
    ================================================================= */
 
@@ -980,3 +944,27 @@ h1.section-title { font-size: 2rem; }
 .tool-level-head p { margin: 4px 0 0; font-size: 14.5px; color: var(--text-soft); }
 @media (max-width: 560px) { .tool-level-head { grid-template-columns: 1fr; } .tool-level-head img { width: 100%; max-width: 280px; } }
 .tool-link-row { text-align: center; margin: 18px 0 4px; }
+
+/* ---- Method details page ---- */
+.cap-grid--2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 820px) { .cap-grid--2 { grid-template-columns: 1fr; } }
+.algo { border: 1px solid var(--rule); border-radius: 8px; background: var(--bg-code); margin: 20px 0 12px; overflow: hidden; }
+.algo-title { font-weight: 700; font-size: 14px; padding: 9px 14px; border-bottom: 1px solid var(--rule); background: var(--bg); }
+.algo pre { margin: 0; padding: 14px 16px; font-family: var(--mono); font-size: 12.8px; line-height: 1.6; overflow-x: auto; color: var(--text); }
+.algo-kw { color: var(--link); font-weight: 700; }
+.algo-cm { color: var(--text-muted); font-style: italic; }
+.schema-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin: 16px 0 8px; }
+@media (max-width: 820px) { .schema-grid { grid-template-columns: 1fr; } }
+.schema-card { border: 1px solid var(--rule); border-left: 4px solid var(--link); border-radius: 8px; padding: 14px 16px; background: var(--bg); }
+.schema-card--mistake { border-left-color: #c0392b; }
+.schema-type { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 8px; }
+.schema-card dl { margin: 0; }
+.schema-card dt { font-family: var(--mono); font-size: 12px; color: var(--link); margin-top: 8px; }
+.schema-card--mistake dt { color: #c0392b; }
+.schema-card dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--text-soft); }
+.steps, .principles { font-size: 15px; line-height: 1.6; color: var(--text-soft); padding-left: 22px; }
+.steps li, .principles li { margin: 6px 0; }
+.th-sub { font-weight: 400; font-size: 12px; color: var(--text-muted); }
+.tag-used { display: inline-block; font-size: 11px; font-weight: 600; color: #0f6b5e; background: #e3f4f1; border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+.reward-table td, .reward-table th { text-align: center; }

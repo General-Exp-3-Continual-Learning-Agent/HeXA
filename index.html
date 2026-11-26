@@ -33,6 +33,7 @@
         <a href="#interphyre">InterPhyre</a>
         <a href="tools.html">Tools</a>
         <a href="#method">Method</a>
+        <a href="method.html">Method details</a>
         <a href="#showcase">Gallery</a>
         <a href="#experiments">Results</a>
         <a href="#beyond">Beyond InterPhyre</a>
@@ -426,9 +427,20 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
         failures provide evidence for diagnosing mistakes. The evolver runs a two-pass distillation: first,
         <strong>contrastive skill extraction</strong> across the full batch (what distinguishes high-reward from
         low-reward trajectories); second, <strong>mistake and partial-skill extraction</strong> focused on the
-        failure subset. Each skill carries a weight <em>w</em><sub>k</sub> derived from the mean reward of its
-        source trajectories.
+        failure subset. Each skill carries a score <em>r</em><sub>k</sub>&nbsp;=&nbsp;clamp((<em>r&#772;</em><sub>src</sub>&nbsp;+&nbsp;1)/2,&nbsp;0.1,&nbsp;1)
+        from the mean reward of its source trajectories; the retriever injects the top-<em>M</em> skills and top-<em>N</em>
+        mistakes, and the bank is capped at <em>M</em><sub>max</sub> skills and <em>N</em><sub>max</sub> mistakes, so the
+        actor's context stays bounded however much experience accumulates.
       </p>
+      <div class="table-wrap container--narrow">
+        <table class="results-table reward-table">
+          <thead><tr><th>Outcome</th><th colspan="4">Success, by turns used</th><th colspan="2">Failure, by turns used</th></tr>
+            <tr><th></th><th>&le; 3</th><th>4&ndash;7</th><th>8&ndash;15</th><th>16&ndash;<em>T</em></th><th>&ge; 10</th><th>&lt; 10</th></tr></thead>
+          <tbody><tr><td><em>r</em>(&tau;)</td><td>+1.00</td><td>+0.75</td><td>+0.50</td><td>+0.25</td><td>&minus;0.50</td><td>&minus;0.75</td></tr></tbody>
+        </table>
+        <p class="table-note">InterPhyre trajectory reward. Failures that keep experimenting are penalised less, since they
+        carry more evidence. Reward labels help but are optional: the evolver can also judge trajectories itself.</p>
+      </div>
 
       <h3 class="subhead">Hierarchical, evolving skills</h3>
       <p>
@@ -442,37 +454,20 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
 
       <h3 class="subhead">Cross-task transfer</h3>
       <p>
-        Given source banks and a textual description of a target task, the evolver identifies structurally
-        relevant skills, re-grounds them in the target task, and recalibrates their weights by how directly the
-        principle transfers &mdash; enabling zero-shot transfer with no target-task trajectories. HExA needs no reward- or action-labeled offline data, no meta-training, and no updates to the actor's parameters.
+        Given source banks and only a textual description of a target task, the evolver (1) selects structurally
+        relevant skills, (2) strips source-specific coordinates and object identities, (3) re-grounds each principle
+        in the target's entities and tools, and (4) scores it by how directly it corresponds and how many source banks
+        corroborate it &mdash; enabling zero-shot transfer with no target-task trajectories. The synthesised bank can be
+        used directly or as the starting bank for further within-task evolution.
       </p>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- EPISODE WALKTHROUGH (ReAct vs HExA)                          -->
-  <!-- ============================================================ -->
-  <section class="section" id="walkthrough">
-    <div class="container">
-      <h2 class="section-title">One Episode, Two Agents</h2>
-      <p class="lead container--narrow">
-        Catapult, seed 45. <strong>ReAct</strong> (no memory) exhausts its 25-iteration budget re-searching
-        placements and never finds a working launch. <strong>HExA</strong> reuses skills distilled from earlier
-        catapult episodes &mdash; it already knows how to launch (drop a heavy ball on the arm) and how to fix the
-        usual failure (when the shot arcs too high and hits the ceiling, shift the drop point sideways to flatten
-        it). After one ceiling overshoot it applies the learned correction and solves the level.
+      <p>
+        After the final round the bank is <strong>frozen</strong>: the evolver is never called on held-out seeds, and
+        nothing carries over between them. HExA needs no reward- or action-labeled offline data, no meta-training, and
+        no updates to the actor's parameters.
       </p>
-
-      <div class="trace-compare">
-        <figure class="trace-row trace-row--fail">
-          <figcaption class="trace-label">ReAct &mdash; 25 iterations, <span class="badge badge--fail">FAILURE</span> &nbsp; placement (0.5, &minus;1.0, 2.0)</figcaption>
-          <img src="assets/trace_react.gif" alt="ReAct failure: 25 iterations, no green–blue contact" loading="lazy" />
-        </figure>
-        <figure class="trace-row trace-row--win">
-          <figcaption class="trace-label">HExA &mdash; 6 iterations, <span class="badge badge--win">SUCCESS</span> &nbsp; placement (0.3, 0.9, 1.5)</figcaption>
-          <img src="assets/trace_hexa.gif" alt="HeXA success: 6 iterations, lever flings green ball over the blocker into the basket" loading="lazy" />
-        </figure>
-      </div>
+      <p class="tool-link-row">
+        <a class="link-button" href="method.html"><span>Full method details: objective, algorithms, skill schema, regimes, budgets &rarr;</span></a>
+      </p>
     </div>
   </section>
 
@@ -480,7 +475,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- HEXA VS BASELINES GALLERY                                    -->
   <!-- ============================================================ -->
 
-  <section class="section section--alt" id="showcase">
+  <section class="section" id="showcase">
     <div class="container">
       <h2 class="section-title">HExA vs. Baselines, Episode by Episode</h2>
       <p class="lead container--narrow">
@@ -589,7 +584,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- ============================================================ -->
   <!-- EXPERIMENTS & RESULTS                                        -->
   <!-- ============================================================ -->
-  <section class="section" id="experiments">
+  <section class="section section--alt" id="experiments">
     <div class="container">
       <h2 class="section-title">Results on InterPhyre</h2>
       <p class="lead container--narrow">
@@ -689,7 +684,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- ============================================================ -->
   <!-- BEYOND INTERPHYRE                                            -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="beyond">
+  <section class="section" id="beyond">
     <div class="container">
       <h2 class="section-title">Beyond InterPhyre</h2>
       <p class="lead container--narrow">
@@ -755,7 +750,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- ============================================================ -->
   <!-- ABLATIONS                                                    -->
   <!-- ============================================================ -->
-  <section class="section" id="ablations">
+  <section class="section section--alt" id="ablations">
     <div class="container">
       <h2 class="section-title">What Drives the Gain</h2>
 
@@ -808,7 +803,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- ============================================================ -->
   <!-- CROSS-LEVEL TRANSFER                                         -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="transfer">
+  <section class="section" id="transfer">
     <div class="container">
       <h2 class="section-title">Hierarchical Skills Transfer to Unseen Tasks</h2>
       <p class="lead container--narrow">
@@ -848,7 +843,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- ============================================================ -->
   <!-- SKILL BANK VIEWER                                            -->
   <!-- ============================================================ -->
-  <section class="section" id="skills">
+  <section class="section section--alt" id="skills">
     <div class="container">
       <h2 class="section-title">Inside the Skill Bank</h2>
       <p class="lead container--narrow">
@@ -1297,7 +1292,7 @@ def build_level(seed=None, variant=0, scene=None) -&gt; Level:
   <!-- ============================================================ -->
   <!-- BIBTEX                                                       -->
   <!-- ============================================================ -->
-  <section class="section section--alt" id="bibtex">
+  <section class="section" id="bibtex">
     <div class="container container--narrow">
       <h2 class="section-title">BibTeX</h2>
       <pre><code>@misc{chandra2026hierarchicalexperimentalistagents,
